@@ -1,21 +1,34 @@
 "use client";
 
-import { useChat } from 'ai/react';
+import { useChat } from "@ai-sdk/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function ChatComponent() {
-    const { messages, input, setInput, handleInputChange, handleSubmit, isLoading } = useChat();
+    const { messages, sendMessage, status } = useChat();
+    const [input, setInput] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
+    const isLoading = status === 'submitted' || status === 'streaming';
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInput(e.target.value);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim()) return;
+        sendMessage({ role: 'user', content: input } as any);
+        setInput('');
+    };
 
     return (
         <div className="flex flex-col h-full bg-background">
@@ -34,7 +47,7 @@ export function ChatComponent() {
                                 : 'bg-muted text-foreground'
                                 }`}
                         >
-                            {m.content}
+                            {(m as any).content}
                         </div>
                     </div>
                 ))}

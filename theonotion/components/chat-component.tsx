@@ -62,3 +62,4 @@ export function ChatComponent() {
         </div>
     );
 }
+

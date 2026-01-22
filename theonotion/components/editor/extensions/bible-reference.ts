@@ -29,7 +29,7 @@ export const BibleReference = Extension.create({
 
                 // Simple regex for "Book Chapter:Verse" (e.g. John 3:16, João 3:16)
                 // Adjust regex for PT-BR names widely
-                const regex = /([1-3]?\s?[A-Za-zÀ-ÿ]+)\s(\d+):(\d+)/$
+                const regex = /([1-3]?\s?[A-Za-zÀ-ÿ]+)\s(\d+):(\d+)$/
                 const match = textBefore.match(regex)
 
                 if (match) {

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useChat } from 'ai/react';
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,8 @@ export function ChatComponent() {
                     <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                         <div
                             className={`rounded-lg px-3 py-2 max-w-[85%] ${m.role === 'user'
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-foreground'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-foreground'
                                 }`}
                         >
                             {m.content}

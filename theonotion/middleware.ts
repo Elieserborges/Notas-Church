@@ -2,6 +2,10 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+    // TESTE DE ISOLAMENTO: Desativando lógica do Supabase temporariamente
+    // para verificar se o erro 500 persiste no Next.js/Vercel puro.
+
+    /*
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -47,6 +51,9 @@ export async function middleware(request: NextRequest) {
     await supabase.auth.getUser()
 
     return supabaseResponse
+    */
+
+    return NextResponse.next()
 }
 
 export const config = {

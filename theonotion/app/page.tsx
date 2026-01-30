@@ -1,16 +1,24 @@
+"use client";
+
 import { AppShell } from "@/components/app-shell";
 import { DailyDevotionalCard } from "@/components/daily-devotional-card";
 import { Editor } from "@/components/editor";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
 
 export default function Home() {
+  const { user } = useAuth();
+
+  // Extract name from email if displayName is not set
+  const displayName = user?.displayName || user?.email?.split('@')[0] || "Visitante";
+
   return (
     <AppShell>
       <div className="flex-1 p-8 space-y-8 max-w-5xl mx-auto w-full">
         <header className="flex items-center justify-between pb-8 border-b">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Bom dia, Gustavo</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Bom dia, {displayName}</h1>
             <p className="text-muted-foreground mt-1">Que a graça e a paz estejam com você hoje.</p>
           </div>
           <Button size="lg" className="shadow-sm">

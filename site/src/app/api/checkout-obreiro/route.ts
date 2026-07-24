@@ -8,6 +8,9 @@ import type { OrderRow } from "@/lib/types";
 
 export const runtime = "nodejs";
 
+const SHIRT_SIZES = ["P", "M", "G", "GG", "EXG"];
+const PAYMENT_METHODS = ["pix", "cartao", "dinheiro"];
+
 /**
  * Inscrição de obreiro: só nome + o e-mail do login. Sem ficha completa,
  * sem ingresso e sem e-mail com QR Code — vale o valor próprio de obreiro.
@@ -35,13 +38,37 @@ export async function POST(req: Request) {
     );
   }
 
+  const bad = (msg: string) =>
+    NextResponse.json({ error: msg }, { status: 400 });
+
   const name = String(body.name ?? "").trim();
   if (name.length < 3 || name.length > 120) {
-    return NextResponse.json(
-      { error: "Informe seu nome completo." },
-      { status: 400 }
-    );
+    return bad("Informe seu nome completo.");
   }
+
+  const phone = String(body.phone ?? "").replace(/\D/g, "");
+  if (phone.length < 10 || phone.length > 13) {
+    return bad("Informe um telefone válido, com DDD.");
+  }
+
+  const paymentMethod = String(body.paymentMethod ?? "").trim().toLowerCase();
+  if (!PAYMENT_METHODS.includes(paymentMethod)) {
+    return bad("Escolha a forma de pagamento.");
+  }
+
+  // "Quer camiseta?" decide o valor. Só existe camiseta se vier um
+  // tamanho válido — e o preço é calculado AQUI, no servidor, nunca a
+  // partir do que o navegador mandou.
+  const querCamiseta = String(body.wantsShirt ?? "") === "sim";
+  const shirtSize = querCamiseta
+    ? String(body.shirtSize ?? "").trim().toUpperCase()
+    : "";
+  if (querCamiseta && !SHIRT_SIZES.includes(shirtSize)) {
+    return bad("Escolha o tamanho da camiseta.");
+  }
+  const valor = querCamiseta
+    ? EVENT.workerPriceWithShirt
+    : EVENT.workerPrice;
 
   try {
     const db = supabaseAdmin();
@@ -51,10 +78,12 @@ export async function POST(req: Request) {
         tipo: "obreiro",
         name,
         email,
-        phone: "", // obreiro não preenche ficha
+        phone,
+        shirt_size: querCamiseta ? shirtSize : null,
+        payment_method: paymentMethod,
         quantity: 1,
-        unit_price: EVENT.workerPrice,
-        total: EVENT.workerPrice,
+        unit_price: valor,
+        total: valor,
       })
       .select()
       .single();
@@ -72,11 +101,13 @@ export async function POST(req: Request) {
             items: [
               {
                 id: "inscricao-obreiro-face-a-face",
-                title: `Obreiro · ${EVENT.name} · ${EVENT.dateLabel}`,
+                title: `Obreiro${querCamiseta ? " + camiseta" : ""} · ${
+                  EVENT.name
+                } · ${EVENT.dateLabel}`,
                 description: EVENT.tagline,
                 category_id: "tickets",
                 quantity: 1,
-                unit_price: EVENT.workerPrice,
+                unit_price: valor,
                 currency_id: "BRL",
               },
             ],

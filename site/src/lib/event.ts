@@ -18,8 +18,10 @@ export const EVENT = {
   mapsUrl: "",
   /** Valor da inscrição, em reais */
   price: 230,
-  /** Valor da inscrição de obreiro, em reais */
+  /** Valor da inscrição de obreiro SEM camiseta, em reais */
   workerPrice: 140,
+  /** Valor da inscrição de obreiro COM camiseta, em reais */
+  workerPriceWithShirt: 190,
   /** Máximo de ingressos por compra */
   maxQuantity: 10,
   /** Parcelamento máximo no cartão (1 = só à vista) */

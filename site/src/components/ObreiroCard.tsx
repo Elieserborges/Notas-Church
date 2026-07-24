@@ -21,6 +21,24 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: "Pagamento recusado",
 };
 
+const SHIRT_SIZES = ["P", "M", "G", "GG", "EXG"];
+
+const PAYMENT_METHODS = [
+  { value: "pix", label: "PIX" },
+  { value: "cartao", label: "Cartão" },
+  { value: "dinheiro", label: "Dinheiro" },
+];
+
+function maskPhone(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10)
+    return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 type Props = {
   userEmail?: string;
   onSignOut?: () => void;
@@ -36,8 +54,17 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
     undefined
   );
   const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [querCamiseta, setQuerCamiseta] = useState("");
+  const [tamanho, setTamanho] = useState("");
+  const [formaPagamento, setFormaPagamento] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+
+  // O valor muda com a camiseta. O servidor recalcula por conta dele —
+  // aqui é só para a pessoa ver o preço enquanto escolhe.
+  const valor =
+    querCamiseta === "sim" ? EVENT.workerPriceWithShirt : EVENT.workerPrice;
 
   const carregar = useCallback(async () => {
     try {
@@ -90,6 +117,10 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
         },
         body: JSON.stringify({
           name: nome,
+          phone: telefone,
+          wantsShirt: querCamiseta,
+          shirtSize: tamanho,
+          paymentMethod: formaPagamento,
           website: String(formData.get("website") ?? ""),
         }),
       });
@@ -207,6 +238,80 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
         />
       </div>
 
+      <div className="field">
+        <label htmlFor="ob-tel">Telefone (com DDD)</label>
+        <input
+          id="ob-tel"
+          type="tel"
+          autoComplete="tel-national"
+          inputMode="numeric"
+          placeholder="(44) 99999-9999"
+          value={telefone}
+          onChange={(e) => setTelefone(maskPhone(e.target.value))}
+          required
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="ob-camiseta">Você quer a camiseta do evento?</label>
+        <select
+          id="ob-camiseta"
+          value={querCamiseta}
+          onChange={(e) => {
+            setQuerCamiseta(e.target.value);
+            if (e.target.value !== "sim") setTamanho("");
+          }}
+          required
+        >
+          <option value="">Selecione…</option>
+          <option value="nao">
+            Sem camiseta — {formatBRL(EVENT.workerPrice)}
+          </option>
+          <option value="sim">
+            Com camiseta — {formatBRL(EVENT.workerPriceWithShirt)}
+          </option>
+        </select>
+      </div>
+
+      {querCamiseta === "sim" && (
+        <div className="field">
+          <label htmlFor="ob-tam">Tamanho da camiseta</label>
+          <select
+            id="ob-tam"
+            value={tamanho}
+            onChange={(e) => setTamanho(e.target.value)}
+            required
+          >
+            <option value="">Selecione…</option>
+            {SHIRT_SIZES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div className="field">
+        <label htmlFor="ob-pag">Como você pretende pagar?</label>
+        <select
+          id="ob-pag"
+          value={formaPagamento}
+          onChange={(e) => setFormaPagamento(e.target.value)}
+          required
+        >
+          <option value="">Selecione…</option>
+          {PAYMENT_METHODS.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+        <p className="hint">
+          Você pode pagar depois — a inscrição já fica registrada.
+        </p>
+      </div>
+
       {/* honeypot: humanos não veem; bots preenchem e são bloqueados */}
       <div className="hp-field" aria-hidden="true">
         <label htmlFor="ob-website">Não preencha este campo</label>
@@ -220,8 +325,14 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
       </div>
 
       <div className="total-row">
-        <span className="label">Valor de obreiro</span>
-        <span className="value">{formatBRL(EVENT.workerPrice)}</span>
+        <span className="label">
+          {querCamiseta === "sim"
+            ? "Obreiro + camiseta"
+            : querCamiseta === "nao"
+              ? "Obreiro sem camiseta"
+              : "Valor de obreiro"}
+        </span>
+        <span className="value">{formatBRL(valor)}</span>
       </div>
 
       <button className="btn btn-block" type="submit" disabled={enviando}>

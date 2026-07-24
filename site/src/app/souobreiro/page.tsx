@@ -37,8 +37,10 @@ export default function SouObreiroPage() {
               <h2 className="display">Sou obreiro</h2>
               <p>
                 Inscrição para quem vai <strong>servir</strong> no{" "}
-                {EVENT.name}. O valor de obreiro é{" "}
-                <strong>{formatBRL(EVENT.workerPrice)}</strong>.
+                {EVENT.name}. Você escolhe entre duas opções:{" "}
+                <strong>{formatBRL(EVENT.workerPrice)}</strong> sem camiseta ou{" "}
+                <strong>{formatBRL(EVENT.workerPriceWithShirt)}</strong> com a
+                camiseta do evento.
               </p>
               <ol className="buy-steps">
                 <li>
@@ -48,9 +50,9 @@ export default function SouObreiroPage() {
                 <li>
                   <span className="n">2</span>
                   <span>
-                    Confira seu nome e clique em{" "}
-                    <strong>Confirmar inscrição</strong> — sem ficha para
-                    preencher.
+                    Preencha nome, telefone, se quer{" "}
+                    <strong>camiseta</strong> e a forma de pagamento — bem
+                    rápido, sem a ficha completa.
                   </span>
                 </li>
                 <li>

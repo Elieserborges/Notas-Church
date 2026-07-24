@@ -8,6 +8,7 @@ export type OrderRow = {
   unit_price: string | number;
   total: string | number;
   status: string; // pending | approved | rejected
+  tipo: string; // participante | obreiro
   mp_preference_id: string | null;
   mp_payment_id: string | null;
   email_sent_at: string | null;

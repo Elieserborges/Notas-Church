@@ -18,6 +18,8 @@ export const EVENT = {
   mapsUrl: "",
   /** Valor da inscrição, em reais */
   price: 230,
+  /** Valor da inscrição de obreiro, em reais */
+  workerPrice: 140,
   /** Máximo de ingressos por compra */
   maxQuantity: 10,
   /** Parcelamento máximo no cartão (1 = só à vista) */

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ensureTickets, trySendTicketsEmail } from "@/lib/orders";
+import { entregarIngressos } from "@/lib/orders";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { OrderRow } from "@/lib/types";
 
@@ -67,10 +67,10 @@ export async function POST(req: Request) {
       }
     }
 
-    const tickets = await ensureTickets(order.id, order.quantity);
-    await trySendTicketsEmail(order, tickets);
+    // Obreiro não recebe ingresso nem e-mail.
+    await entregarIngressos(order);
 
-    return NextResponse.json({ ok: true, tickets: tickets.length });
+    return NextResponse.json({ ok: true, tipo: order.tipo });
   } catch (e) {
     console.error("[admin/mark-paid]", e);
     return NextResponse.json(

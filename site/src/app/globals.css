@@ -1524,9 +1524,11 @@ a {
   }
 }
 
-@media (max-width: 370px) {
-  .brand-name {
-    font-size: 13px;
+@media (max-width: 430px) {
+  /* Com dois botões no menu, o nome da igreja não cabe inteiro em telas
+     pequenas. Melhor mostrar só o selo "FF" do que um texto cortado. */
+  .header .brand-name {
+    display: none;
   }
 
   .nav .btn {

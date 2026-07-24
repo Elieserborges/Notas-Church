@@ -71,6 +71,16 @@ export async function trySendTicketsEmail(
 }
 
 /**
+ * Entrega o que o pedido aprovado tem direito: ingressos + e-mail.
+ * Obreiro não recebe nada disso — fica só registrado como pago.
+ */
+export async function entregarIngressos(order: OrderRow): Promise<void> {
+  if (order.tipo === "obreiro") return;
+  const tickets = await ensureTickets(order.id, order.quantity);
+  await trySendTicketsEmail(order, tickets);
+}
+
+/**
  * Busca o pagamento no Mercado Pago e atualiza o pedido correspondente.
  * Chamado pelo webhook e também pela página de retorno (autocorreção).
  * Idempotente e à prova de chamadas concorrentes.
@@ -99,8 +109,7 @@ export async function processPaymentById(paymentId: string): Promise<void> {
 
   if (order.status === "approved") {
     // Já aprovado: só garante ingressos + e-mail (retentativa)
-    const tickets = await ensureTickets(order.id, order.quantity);
-    await trySendTicketsEmail(order, tickets);
+    await entregarIngressos(order);
     return;
   }
 
@@ -114,9 +123,7 @@ export async function processPaymentById(paymentId: string): Promise<void> {
       .select();
     if (!won || won.length === 0) return;
 
-    const updated = won[0] as OrderRow;
-    const tickets = await ensureTickets(updated.id, updated.quantity);
-    await trySendTicketsEmail(updated, tickets);
+    await entregarIngressos(won[0] as OrderRow);
     return;
   }
 

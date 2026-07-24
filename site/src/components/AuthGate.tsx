@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { MinhaInscricao } from "@/components/MinhaInscricao";
+import { ObreiroCard } from "@/components/ObreiroCard";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Mode = "entrar" | "criar";
@@ -30,7 +31,12 @@ function mensagemErro(e: unknown): string {
  * Portão de acesso da inscrição: o site é público, mas para se inscrever
  * a pessoa precisa entrar (Google ou e-mail + senha).
  */
-export function AuthGate() {
+type AuthGateProps = {
+  /** "obreiro" mostra a inscrição de obreiro em vez da ficha completa. */
+  modo?: "participante" | "obreiro";
+};
+
+export function AuthGate({ modo = "participante" }: AuthGateProps) {
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
   const [mode, setMode] = useState<Mode>("entrar");
@@ -151,8 +157,11 @@ export function AuthGate() {
 
   // ---- Já está logado → mostra a inscrição (ou o formulário) --------
   if (user) {
-    return (
-      <MinhaInscricao userEmail={user.email ?? ""} onSignOut={handleSignOut} />
+    const props = { userEmail: user.email ?? "", onSignOut: handleSignOut };
+    return modo === "obreiro" ? (
+      <ObreiroCard {...props} />
+    ) : (
+      <MinhaInscricao {...props} />
     );
   }
 
@@ -160,7 +169,11 @@ export function AuthGate() {
   return (
     <form className="form-card" onSubmit={handleSubmit}>
       <p className="form-title">
-        {mode === "entrar" ? "Entrar para se inscrever" : "Criar sua conta"}
+        {mode === "criar"
+          ? "Criar sua conta"
+          : modo === "obreiro"
+            ? "Entrar para se inscrever como obreiro"
+            : "Entrar para se inscrever"}
       </p>
       <p className="form-sub">
         {mode === "entrar"

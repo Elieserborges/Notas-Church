@@ -12,6 +12,7 @@ type SheetOrder = {
   quantity: number;
   total: number;
   status: string;
+  tipo: string;
   birth_date: string | null;
   cpf: string | null;
   shirt_size: string | null;
@@ -90,6 +91,21 @@ const PAY_LABEL: Record<string, string> = {
 const dash = (v: string | null) => (v && v.trim() ? v : "—");
 
 type StatusFilter = "todos" | "pending" | "approved";
+type TipoFilter = "todos" | "participante" | "obreiro";
+
+const TIPO_LABEL: Record<string, string> = {
+  participante: "Participante",
+  obreiro: "Obreiro",
+};
+
+const selectStyle: React.CSSProperties = {
+  border: "1.5px solid #eadbc8",
+  borderRadius: 12,
+  padding: "9px 12px",
+  background: "var(--cream)",
+  font: "inherit",
+  color: "inherit",
+};
 
 export function SheetClient() {
   const [pin, setPin] = useState<string | null>(null);
@@ -99,6 +115,7 @@ export function SheetClient() {
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [tipoFilter, setTipoFilter] = useState<TipoFilter>("todos");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [marcando, setMarcando] = useState<string | null>(null);
 
@@ -186,6 +203,7 @@ export function SheetClient() {
     if (!orders) return;
     const header = [
       "Nome",
+      "Tipo",
       "E-mail",
       "Telefone",
       "Data de nascimento",
@@ -211,6 +229,7 @@ export function SheetClient() {
     const lines = orders.map((o) =>
       [
         o.name,
+        TIPO_LABEL[o.tipo || "participante"] ?? o.tipo,
         o.email,
         fmtPhone(o.phone),
         fmtBirth(o.birth_date),
@@ -277,7 +296,17 @@ export function SheetClient() {
     );
   }
 
-  const all = orders ?? [];
+  const todas = orders ?? [];
+  const tipoDe = (o: SheetOrder) => o.tipo || "participante";
+  // Os números do topo seguem o filtro de tipo: escolher "Obreiros"
+  // mostra os totais só dos obreiros.
+  const all = todas.filter(
+    (o) => tipoFilter === "todos" || tipoDe(o) === tipoFilter
+  );
+  const qtdParticipantes = todas.filter(
+    (o) => tipoDe(o) === "participante"
+  ).length;
+  const qtdObreiros = todas.filter((o) => tipoDe(o) === "obreiro").length;
   const approved = all.filter((o) => o.status === "approved");
   const pending = all.filter((o) => o.status === "pending");
   const paidPeople = approved.length;
@@ -346,17 +375,22 @@ export function SheetClient() {
           aria-label="Filtrar inscritos"
         />
         <select
+          value={tipoFilter}
+          onChange={(e) => setTipoFilter(e.target.value as TipoFilter)}
+          aria-label="Filtrar por tipo de inscrição"
+          style={selectStyle}
+        >
+          <option value="todos">Todos os tipos ({todas.length})</option>
+          <option value="participante">
+            Participantes ({qtdParticipantes})
+          </option>
+          <option value="obreiro">Obreiros ({qtdObreiros})</option>
+        </select>
+        <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
           aria-label="Filtrar por situação do pagamento"
-          style={{
-            border: "1.5px solid #eadbc8",
-            borderRadius: 12,
-            padding: "9px 12px",
-            background: "var(--cream)",
-            font: "inherit",
-            color: "inherit",
-          }}
+          style={selectStyle}
         >
           <option value="todos">Todos ({all.length})</option>
           <option value="pending">
@@ -393,6 +427,7 @@ export function SheetClient() {
             <thead>
               <tr>
                 <th>Nome</th>
+                <th>Tipo</th>
                 <th>Telefone</th>
                 <th>Camiseta</th>
                 <th>Forma</th>
@@ -409,6 +444,9 @@ export function SheetClient() {
                     <td>
                       <span className="cell-name">{o.name}</span>
                       <span className="cell-email">{o.email}</span>
+                    </td>
+                    <td className="nowrap">
+                      {TIPO_LABEL[tipoDe(o)] ?? tipoDe(o)}
                     </td>
                     <td className="nowrap">{fmtPhone(o.phone)}</td>
                     <td>{dash(o.shirt_size)}</td>
@@ -472,7 +510,7 @@ export function SheetClient() {
                   </tr>
                   {expanded === o.id && (
                     <tr>
-                      <td colSpan={8}>
+                      <td colSpan={9}>
                         <div
                           style={{
                             display: "grid",

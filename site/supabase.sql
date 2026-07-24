@@ -27,6 +27,7 @@ create table if not exists public.orders (
 -- "add column if not exists" deixa rodar de novo sem erro em bancos
 -- que já existem.
 alter table public.orders
+  add column if not exists tipo text not null default 'participante',
   add column if not exists birth_date date,
   add column if not exists cpf text,
   add column if not exists shirt_size text,

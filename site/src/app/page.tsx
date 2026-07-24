@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AuthGate } from "@/components/AuthGate";
+import { FaixaPrazo } from "@/components/FaixaPrazo";
 import { TopoAoCarregar } from "@/components/TopoAoCarregar";
 import { EVENT, formatBRL } from "@/lib/event";
 
@@ -44,21 +45,7 @@ export default function Home() {
       <TopoAoCarregar />
 
       {/* ---------- Aviso: prazo de inscrição ---------- */}
-      <div
-        role="note"
-        style={{
-          background: "#FACC15",
-          color: "#1f2937",
-          textAlign: "center",
-          padding: "10px 16px",
-          fontWeight: 700,
-          fontSize: "0.9rem",
-          textTransform: "uppercase",
-          letterSpacing: "0.03em",
-        }}
-      >
-        Inscrições até dia {EVENT.registrationDeadlineLabel}
-      </div>
+      <FaixaPrazo />
 
       {/* ---------- Header ---------- */}
       <header className="header">
@@ -71,6 +58,9 @@ export default function Home() {
             {hasSpeakers && <a href="#preletores">Preletores</a>}
             <a href="#infos">Informações</a>
             <a href="#faq">Dúvidas</a>
+            <a className="btn btn-sm btn-outline" href="/souobreiro">
+              Sou obreiro
+            </a>
             <a className="btn btn-sm" href="#ingressos">
               Inscrição
             </a>

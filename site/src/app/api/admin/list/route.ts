@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const { data: ordersData, error: oe } = await db
       .from("orders")
       .select(
-        "id,created_at,name,email,phone,quantity,total,status,birth_date,cpf,shirt_size,family_name,family_relationship,family_phone,payment_method,uses_medication,medication_details,climbs_stairs,sleeps_top_bunk,gc_leader,close_person_name,close_person_phone"
+        "id,created_at,name,email,phone,quantity,total,status,tipo,birth_date,cpf,shirt_size,family_name,family_relationship,family_phone,payment_method,uses_medication,medication_details,climbs_stairs,sleeps_top_bunk,gc_leader,close_person_name,close_person_phone"
       )
       .order("created_at", { ascending: false })
       .limit(5000);

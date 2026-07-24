@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { emailDoUsuario } from "@/lib/authServer";
 import { EVENT } from "@/lib/event";
 import { mpPreference } from "@/lib/mp";
 import { siteUrl } from "@/lib/site";
@@ -7,24 +7,6 @@ import { supabaseAdmin } from "@/lib/supabase";
 import type { OrderRow, TicketRow } from "@/lib/types";
 
 export const runtime = "nodejs";
-
-/** Confere o token do navegador e devolve o e-mail de quem está logado. */
-async function emailDoUsuario(req: Request): Promise<string | null> {
-  const header = req.headers.get("authorization") ?? "";
-  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-  if (!token) return null;
-
-  const url = process.env.SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anon) return null;
-
-  const auth = createClient(url, anon, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data, error } = await auth.auth.getUser(token);
-  if (error || !data.user?.email) return null;
-  return data.user.email.toLowerCase();
-}
 
 /**
  * Inscrições da pessoa que está logada — para ela ver a situação do
@@ -40,7 +22,9 @@ export async function GET(req: Request) {
     const db = supabaseAdmin();
     const { data: ordersData, error: oe } = await db
       .from("orders")
-      .select("id,created_at,name,status,total,payment_method,mp_preference_id")
+      .select(
+        "id,created_at,name,status,total,payment_method,mp_preference_id,tipo"
+      )
       .eq("email", email)
       .order("created_at", { ascending: false })
       .limit(20);
@@ -55,6 +39,7 @@ export async function GET(req: Request) {
       | "total"
       | "payment_method"
       | "mp_preference_id"
+      | "tipo"
     >[];
 
     if (orders.length === 0) return NextResponse.json({ orders: [] });
@@ -132,6 +117,7 @@ export async function GET(req: Request) {
           id: o.id,
           created_at: o.created_at,
           name: o.name,
+          tipo: o.tipo,
           status: o.status,
           total: Number(o.total),
           payment_method: o.payment_method,

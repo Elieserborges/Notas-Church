@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Playfair_Display } from "next/font/google";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { EVENT, formatBRL } from "@/lib/event";
 import "./globals.css";
 
@@ -42,7 +43,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={`${montserrat.variable} ${playfair.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <WhatsAppFloat />
+      </body>
     </html>
   );
 }

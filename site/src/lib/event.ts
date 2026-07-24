@@ -6,6 +6,8 @@ export const EVENT = {
   tagline: "Um encontro de homens, face a face com Deus",
   audience: "para homens",
   church: "Fonte Church",
+  /** WhatsApp de suporte (só dígitos: 55 + DDD + número) — botão flutuante */
+  supportWhatsapp: "5551986308119",
   dateLabel: "15 e 16 de Agosto de 2026",
   /** Prazo final das inscrições — exibido no aviso amarelo do topo do site */
   registrationDeadlineLabel: "13/08/2026",

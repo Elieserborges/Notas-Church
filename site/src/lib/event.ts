@@ -7,6 +7,8 @@ export const EVENT = {
   audience: "para homens",
   church: "Fonte Church",
   dateLabel: "15 e 16 de Agosto de 2026",
+  /** Prazo final das inscrições — exibido no aviso amarelo do topo do site */
+  registrationDeadlineLabel: "13/08/2026",
   // ⚠️ AJUSTAR quando definirem a programação:
   timeLabel: "Programação divulgada em breve",
   isoStart: "2026-08-15T19:00:00-03:00",

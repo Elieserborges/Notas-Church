@@ -13,9 +13,15 @@ function maskPhone(value: string): string {
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
-export function BuyForm() {
+type BuyFormProps = {
+  /** E-mail da conta logada — pré-preenche o campo (continua editável). */
+  userEmail?: string;
+  onSignOut?: () => void;
+};
+
+export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(userEmail ?? "");
   const [phone, setPhone] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -58,6 +64,20 @@ export function BuyForm() {
         Preencha seus dados — o ingresso com QR Code chega no seu e-mail assim
         que o pagamento for aprovado.
       </p>
+
+      {userEmail && (
+        <p className="hint">
+          Conectado como <strong>{userEmail}</strong>
+          {onSignOut && (
+            <>
+              {" · "}
+              <button type="button" className="link-btn" onClick={onSignOut}>
+                Sair
+              </button>
+            </>
+          )}
+        </p>
+      )}
 
       {error && (
         <p className="form-error" role="alert">

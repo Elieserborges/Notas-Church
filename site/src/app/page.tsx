@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { BuyForm } from "@/components/BuyForm";
+import { AuthGate } from "@/components/AuthGate";
 import { EVENT, formatBRL } from "@/lib/event";
 
 function initials(fullName: string): string {
@@ -40,6 +40,23 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* ---------- Aviso: prazo de inscrição ---------- */}
+      <div
+        role="note"
+        style={{
+          background: "#FACC15",
+          color: "#1f2937",
+          textAlign: "center",
+          padding: "10px 16px",
+          fontWeight: 700,
+          fontSize: "0.9rem",
+          textTransform: "uppercase",
+          letterSpacing: "0.03em",
+        }}
+      >
+        Inscrições até dia {EVENT.registrationDeadlineLabel}
+      </div>
+
       {/* ---------- Header ---------- */}
       <header className="header">
         <div className="container header-inner">
@@ -63,7 +80,7 @@ export default function Home() {
         <section className="hero">
           <div className="container hero-grid">
             <div>
-              <span className="hero-kicker">🦁 {EVENT.church} apresenta</span>
+              <span className="hero-kicker">{EVENT.church} apresenta</span>
               <h1 className="display hero-title">{EVENT.name}</h1>
               <p className="hero-tagline">{EVENT.tagline}</p>
               <p className="hero-sub">
@@ -212,7 +229,7 @@ export default function Home() {
                 </li>
               </ol>
             </div>
-            <BuyForm />
+            <AuthGate />
           </div>
         </section>
 

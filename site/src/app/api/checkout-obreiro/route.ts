@@ -51,6 +51,22 @@ export async function POST(req: Request) {
     return bad("Informe um telefone válido, com DDD.");
   }
 
+  const cpf = String(body.cpf ?? "").replace(/\D/g, "");
+  if (cpf.length !== 11) {
+    return bad("Informe um CPF válido (11 dígitos).");
+  }
+
+  const gcLeader = String(body.gcLeader ?? "").trim();
+  if (!gcLeader || gcLeader.length > 120) {
+    return bad("Informe quem é o seu líder de Célula.");
+  }
+
+  const carro = String(body.goesByCar ?? "").trim().toLowerCase();
+  if (carro !== "sim" && carro !== "nao") {
+    return bad("Responda se você vai de carro.");
+  }
+  const goesByCar = carro === "sim";
+
   const paymentMethod = String(body.paymentMethod ?? "").trim().toLowerCase();
   if (!PAYMENT_METHODS.includes(paymentMethod)) {
     return bad("Escolha a forma de pagamento.");
@@ -79,6 +95,9 @@ export async function POST(req: Request) {
         name,
         email,
         phone,
+        cpf,
+        gc_leader: gcLeader,
+        goes_by_car: goesByCar,
         shirt_size: querCamiseta ? shirtSize : null,
         payment_method: paymentMethod,
         quantity: 1,

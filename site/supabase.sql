@@ -41,7 +41,8 @@ alter table public.orders
   add column if not exists sleeps_top_bunk boolean,
   add column if not exists gc_leader text,
   add column if not exists close_person_name text,
-  add column if not exists close_person_phone text;
+  add column if not exists close_person_phone text,
+  add column if not exists goes_by_car boolean;
 
 -- Ingressos (um por pessoa, com código único)
 create table if not exists public.tickets (

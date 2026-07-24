@@ -27,6 +27,7 @@ type SheetOrder = {
   gc_leader: string | null;
   close_person_name: string | null;
   close_person_phone: string | null;
+  goes_by_car: boolean | null;
   tickets: { code: string; used_at: string | null }[];
 };
 
@@ -247,6 +248,7 @@ export function SheetClient() {
       "Sobe escada",
       "Dorme em cima do beliche",
       "Lider de Celula",
+      "Vai de carro",
       "Pessoa proxima - nome",
       "Pessoa proxima - telefone",
       "Data da inscricao",
@@ -273,6 +275,7 @@ export function SheetClient() {
         simNao(o.climbs_stairs),
         simNao(o.sleeps_top_bunk),
         dash(o.gc_leader),
+        simNao(o.goes_by_car),
         dash(o.close_person_name),
         fmtPhone(o.close_person_phone ?? ""),
         fmtDate(o.created_at),
@@ -592,6 +595,10 @@ export function SheetClient() {
                           <div>
                             <strong>Líder de Célula:</strong>{" "}
                             {dash(o.gc_leader)}
+                          </div>
+                          <div>
+                            <strong>Vai de carro:</strong>{" "}
+                            {simNao(o.goes_by_car)}
                           </div>
                           <div>
                             <strong>Pessoa próxima:</strong>{" "}

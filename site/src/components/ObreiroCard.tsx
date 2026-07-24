@@ -29,6 +29,14 @@ const PAYMENT_METHODS = [
   { value: "dinheiro", label: "Dinheiro" },
 ];
 
+function maskCPF(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
 function maskPhone(value: string): string {
   const d = value.replace(/\D/g, "").slice(0, 11);
   if (d.length === 0) return "";
@@ -54,7 +62,10 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
     undefined
   );
   const [nome, setNome] = useState("");
+  const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [liderCelula, setLiderCelula] = useState("");
+  const [vaiDeCarro, setVaiDeCarro] = useState("");
   const [querCamiseta, setQuerCamiseta] = useState("");
   const [tamanho, setTamanho] = useState("");
   const [formaPagamento, setFormaPagamento] = useState("");
@@ -117,7 +128,10 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
         },
         body: JSON.stringify({
           name: nome,
+          cpf,
           phone: telefone,
+          gcLeader: liderCelula,
+          goesByCar: vaiDeCarro,
           wantsShirt: querCamiseta,
           shirtSize: tamanho,
           paymentMethod: formaPagamento,
@@ -239,6 +253,20 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
       </div>
 
       <div className="field">
+        <label htmlFor="ob-cpf">CPF</label>
+        <input
+          id="ob-cpf"
+          type="text"
+          inputMode="numeric"
+          placeholder="000.000.000-00"
+          value={cpf}
+          onChange={(e) => setCpf(maskCPF(e.target.value))}
+          required
+          minLength={14}
+        />
+      </div>
+
+      <div className="field">
         <label htmlFor="ob-tel">Telefone (com DDD)</label>
         <input
           id="ob-tel"
@@ -250,6 +278,33 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
           onChange={(e) => setTelefone(maskPhone(e.target.value))}
           required
         />
+      </div>
+
+      <div className="field">
+        <label htmlFor="ob-lider">Quem é o seu líder de Célula?</label>
+        <input
+          id="ob-lider"
+          type="text"
+          placeholder="Nome do líder da sua célula"
+          value={liderCelula}
+          onChange={(e) => setLiderCelula(e.target.value)}
+          required
+          maxLength={120}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="ob-carro">Vai de carro?</label>
+        <select
+          id="ob-carro"
+          value={vaiDeCarro}
+          onChange={(e) => setVaiDeCarro(e.target.value)}
+          required
+        >
+          <option value="">Selecione…</option>
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
       </div>
 
       <div className="field">

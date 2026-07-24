@@ -29,6 +29,7 @@ export type OrderRow = {
   gc_leader: string | null;
   close_person_name: string | null;
   close_person_phone: string | null;
+  goes_by_car: boolean | null;
 };
 
 export type TicketRow = {

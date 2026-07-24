@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { EVENT, formatBRL } from "@/lib/event";
 
 type SheetOrder = {
@@ -12,6 +12,20 @@ type SheetOrder = {
   quantity: number;
   total: number;
   status: string;
+  birth_date: string | null;
+  cpf: string | null;
+  shirt_size: string | null;
+  family_name: string | null;
+  family_relationship: string | null;
+  family_phone: string | null;
+  payment_method: string | null;
+  uses_medication: boolean | null;
+  medication_details: string | null;
+  climbs_stairs: boolean | null;
+  sleeps_top_bunk: boolean | null;
+  gc_leader: string | null;
+  close_person_name: string | null;
+  close_person_phone: string | null;
   tickets: { code: string; used_at: string | null }[];
 };
 
@@ -26,9 +40,16 @@ function fold(s: string): string {
 }
 
 function fmtPhone(d: string): string {
+  if (!d) return "—";
   if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
   if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return d;
+}
+
+function fmtCPF(d: string | null): string {
+  if (!d) return "—";
+  if (d.length !== 11) return d;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
 }
 
 function fmtDate(iso: string): string {
@@ -44,11 +65,31 @@ function fmtDate(iso: string): string {
   }
 }
 
+function fmtBirth(d: string | null): string {
+  if (!d) return "—";
+  const [y, m, day] = d.split("-");
+  return y && m && day ? `${day}/${m}/${y}` : d;
+}
+
+function simNao(v: boolean | null): string {
+  return v === true ? "Sim" : v === false ? "Não" : "—";
+}
+
 const STATUS_LABEL: Record<string, string> = {
   approved: "Pago",
   pending: "Pendente",
   rejected: "Recusado",
 };
+
+const PAY_LABEL: Record<string, string> = {
+  pix: "PIX",
+  cartao: "Cartão",
+  dinheiro: "Dinheiro",
+};
+
+const dash = (v: string | null) => (v && v.trim() ? v : "—");
+
+type StatusFilter = "todos" | "pending" | "approved";
 
 export function SheetClient() {
   const [pin, setPin] = useState<string | null>(null);
@@ -57,6 +98,8 @@ export function SheetClient() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const load = useCallback(async (thePin: string) => {
     setLoading(true);
@@ -114,12 +157,25 @@ export function SheetClient() {
     const header = [
       "Nome",
       "E-mail",
-      "WhatsApp",
-      "Qtd ingressos",
+      "Telefone",
+      "Data de nascimento",
+      "CPF",
+      "Camiseta",
+      "Forma de pagamento",
       "Status pagamento",
       "Valor",
-      "Data da compra",
-      "Códigos",
+      "Familiar - nome",
+      "Familiar - parentesco",
+      "Familiar - telefone",
+      "Usa medicamento",
+      "Medicamentos e horarios",
+      "Sobe escada",
+      "Dorme em cima do beliche",
+      "Lider de GC",
+      "Pessoa proxima - nome",
+      "Pessoa proxima - telefone",
+      "Data da inscricao",
+      "Codigos",
       "Entradas confirmadas",
     ];
     const lines = orders.map((o) =>
@@ -127,14 +183,27 @@ export function SheetClient() {
         o.name,
         o.email,
         fmtPhone(o.phone),
-        String(o.quantity),
+        fmtBirth(o.birth_date),
+        fmtCPF(o.cpf),
+        dash(o.shirt_size),
+        o.payment_method ? (PAY_LABEL[o.payment_method] ?? o.payment_method) : "—",
         STATUS_LABEL[o.status] ?? o.status,
         String(o.total).replace(".", ","),
+        dash(o.family_name),
+        dash(o.family_relationship),
+        fmtPhone(o.family_phone ?? ""),
+        simNao(o.uses_medication),
+        dash(o.medication_details),
+        simNao(o.climbs_stairs),
+        simNao(o.sleeps_top_bunk),
+        dash(o.gc_leader),
+        dash(o.close_person_name),
+        fmtPhone(o.close_person_phone ?? ""),
         fmtDate(o.created_at),
         o.tickets.map((t) => t.code).join(" "),
         String(o.tickets.filter((t) => t.used_at).length),
       ]
-        .map((v) => `"${v.replaceAll('"', '""')}"`)
+        .map((v) => `"${String(v).replaceAll('"', '""')}"`)
         .join(";")
     );
     // BOM + ponto-e-vírgula → abre certinho no Excel brasileiro
@@ -178,19 +247,23 @@ export function SheetClient() {
     );
   }
 
-  const approved = (orders ?? []).filter((o) => o.status === "approved");
-  const paidPeople = approved.reduce((s, o) => s + o.quantity, 0);
-  const enteredCount = (orders ?? []).reduce(
+  const all = orders ?? [];
+  const approved = all.filter((o) => o.status === "approved");
+  const pending = all.filter((o) => o.status === "pending");
+  const paidPeople = approved.length;
+  const enteredCount = all.reduce(
     (s, o) => s + o.tickets.filter((t) => t.used_at).length,
     0
   );
-  const pendingCount = (orders ?? []).filter((o) => o.status === "pending").length;
   const revenue = approved.reduce((s, o) => s + o.total, 0);
+  const aReceber = pending.reduce((s, o) => s + o.total, 0);
 
   const term = fold(filter);
-  const visible = (orders ?? []).filter(
-    (o) => !term || fold(o.name).includes(term) || fold(o.email).includes(term)
-  );
+  const visible = all
+    .filter((o) => statusFilter === "todos" || o.status === statusFilter)
+    .filter(
+      (o) => !term || fold(o.name).includes(term) || fold(o.email).includes(term)
+    );
 
   return (
     <div className="sheet-wrap">
@@ -214,19 +287,23 @@ export function SheetClient() {
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-value">{paidPeople}</span>
-          <span className="stat-label">🎟️ Pagantes</span>
+          <span className="stat-label">✅ Pagos</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{enteredCount}</span>
-          <span className="stat-label">✅ Já entraram</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{pendingCount}</span>
-          <span className="stat-label">⏳ Pendentes</span>
+          <span className="stat-value">{pending.length}</span>
+          <span className="stat-label">⏳ Aguardando pagamento</span>
         </div>
         <div className="stat-card">
           <span className="stat-value">{formatBRL(revenue)}</span>
-          <span className="stat-label">💰 Arrecadado</span>
+          <span className="stat-label">💰 Recebido</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{formatBRL(aReceber)}</span>
+          <span className="stat-label">📌 A receber</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{enteredCount}</span>
+          <span className="stat-label">🚪 Já entraram</span>
         </div>
       </div>
 
@@ -238,6 +315,25 @@ export function SheetClient() {
           onChange={(e) => setFilter(e.target.value)}
           aria-label="Filtrar inscritos"
         />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+          aria-label="Filtrar por situação do pagamento"
+          style={{
+            border: "1.5px solid #eadbc8",
+            borderRadius: 12,
+            padding: "9px 12px",
+            background: "var(--cream)",
+            font: "inherit",
+            color: "inherit",
+          }}
+        >
+          <option value="todos">Todos ({all.length})</option>
+          <option value="pending">
+            Só quem falta pagar ({pending.length})
+          </option>
+          <option value="approved">Só quem já pagou ({approved.length})</option>
+        </select>
         <button
           className="btn btn-sm btn-outline"
           type="button"
@@ -257,8 +353,8 @@ export function SheetClient() {
         <div className="spinner" />
       ) : visible.length === 0 ? (
         <p className="sheet-empty">
-          {orders.length === 0
-            ? "Nenhuma inscrição ainda. Assim que alguém comprar, aparece aqui."
+          {all.length === 0
+            ? "Nenhuma inscrição ainda. Assim que alguém se inscrever, aparece aqui."
             : "Nenhum resultado para esse filtro."}
         </p>
       ) : (
@@ -267,47 +363,120 @@ export function SheetClient() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>WhatsApp</th>
-                <th>Qtd</th>
+                <th>Telefone</th>
+                <th>Camiseta</th>
+                <th>Forma</th>
                 <th>Pagamento</th>
                 <th>Ingressos</th>
-                <th>Valor</th>
-                <th>Compra</th>
+                <th>Inscrição</th>
+                <th>Ficha</th>
               </tr>
             </thead>
             <tbody>
               {visible.map((o) => (
-                <tr key={o.id}>
-                  <td>
-                    <span className="cell-name">{o.name}</span>
-                    <span className="cell-email">{o.email}</span>
-                  </td>
-                  <td className="nowrap">{fmtPhone(o.phone)}</td>
-                  <td>{o.quantity}</td>
-                  <td>
-                    <span className={`pay-chip pay-${o.status}`}>
-                      {STATUS_LABEL[o.status] ?? o.status}
-                    </span>
-                  </td>
-                  <td>
-                    {o.tickets.length === 0 ? (
-                      <span className="cell-email">—</span>
-                    ) : (
-                      o.tickets.map((t) => (
-                        <span
-                          className={`code-chip ${t.used_at ? "code-used" : ""}`}
-                          key={t.code}
-                          title={t.used_at ? "Entrada confirmada" : "Ainda não entrou"}
+                <Fragment key={o.id}>
+                  <tr>
+                    <td>
+                      <span className="cell-name">{o.name}</span>
+                      <span className="cell-email">{o.email}</span>
+                    </td>
+                    <td className="nowrap">{fmtPhone(o.phone)}</td>
+                    <td>{dash(o.shirt_size)}</td>
+                    <td className="nowrap">
+                      {o.payment_method
+                        ? (PAY_LABEL[o.payment_method] ?? o.payment_method)
+                        : "—"}
+                    </td>
+                    <td>
+                      <span className={`pay-chip pay-${o.status}`}>
+                        {STATUS_LABEL[o.status] ?? o.status}
+                      </span>
+                    </td>
+                    <td>
+                      {o.tickets.length === 0 ? (
+                        <span className="cell-email">—</span>
+                      ) : (
+                        o.tickets.map((t) => (
+                          <span
+                            className={`code-chip ${t.used_at ? "code-used" : ""}`}
+                            key={t.code}
+                            title={
+                              t.used_at ? "Entrada confirmada" : "Ainda não entrou"
+                            }
+                          >
+                            {t.used_at ? "✓ " : ""}
+                            {t.code}
+                          </span>
+                        ))
+                      )}
+                    </td>
+                    <td className="nowrap">{fmtDate(o.created_at)}</td>
+                    <td>
+                      <button
+                        className="link-btn"
+                        type="button"
+                        onClick={() =>
+                          setExpanded(expanded === o.id ? null : o.id)
+                        }
+                      >
+                        {expanded === o.id ? "fechar" : "ver"}
+                      </button>
+                    </td>
+                  </tr>
+                  {expanded === o.id && (
+                    <tr>
+                      <td colSpan={8}>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fit, minmax(220px, 1fr))",
+                            gap: "10px 22px",
+                            padding: "12px 4px 16px",
+                            fontSize: 14,
+                            lineHeight: 1.6,
+                          }}
                         >
-                          {t.used_at ? "✓ " : ""}
-                          {t.code}
-                        </span>
-                      ))
-                    )}
-                  </td>
-                  <td className="nowrap">{formatBRL(o.total)}</td>
-                  <td className="nowrap">{fmtDate(o.created_at)}</td>
-                </tr>
+                          <div>
+                            <strong>Nascimento:</strong> {fmtBirth(o.birth_date)}
+                          </div>
+                          <div>
+                            <strong>CPF:</strong> {fmtCPF(o.cpf)}
+                          </div>
+                          <div>
+                            <strong>Familiar:</strong> {dash(o.family_name)}
+                            {o.family_relationship
+                              ? ` (${o.family_relationship})`
+                              : ""}{" "}
+                            — {fmtPhone(o.family_phone ?? "")}
+                          </div>
+                          <div>
+                            <strong>Usa medicamento:</strong>{" "}
+                            {simNao(o.uses_medication)}
+                            {o.uses_medication && o.medication_details
+                              ? ` — ${o.medication_details}`
+                              : ""}
+                          </div>
+                          <div>
+                            <strong>Sobe escada:</strong> {simNao(o.climbs_stairs)}
+                          </div>
+                          <div>
+                            <strong>Beliche de cima:</strong>{" "}
+                            {simNao(o.sleeps_top_bunk)}
+                          </div>
+                          <div>
+                            <strong>Líder de GC:</strong> {dash(o.gc_leader)}
+                          </div>
+                          <div>
+                            <strong>Pessoa próxima:</strong>{" "}
+                            {dash(o.close_person_name)} —{" "}
+                            {fmtPhone(o.close_person_phone ?? "")}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -316,7 +485,8 @@ export function SheetClient() {
 
       <p className="sheet-foot">
         A lista atualiza sozinha a cada minuto. “✓” no ingresso = entrada já
-        confirmada na portaria.
+        confirmada na portaria. Clique em <strong>ver</strong> para abrir a ficha
+        completa da pessoa.
       </p>
       <p className="team-links">
         <a href="/validar">🎟️ Ir para a validação de ingressos</a>

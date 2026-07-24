@@ -12,6 +12,22 @@ export type OrderRow = {
   mp_payment_id: string | null;
   email_sent_at: string | null;
   email_error: string | null;
+
+  // --- Ficha de inscrição (acampamento) ---
+  birth_date: string | null;
+  cpf: string | null;
+  shirt_size: string | null;
+  family_name: string | null;
+  family_relationship: string | null;
+  family_phone: string | null;
+  payment_method: string | null; // pix | cartao | dinheiro
+  uses_medication: boolean | null;
+  medication_details: string | null;
+  climbs_stairs: boolean | null;
+  sleeps_top_bunk: boolean | null;
+  gc_leader: string | null;
+  close_person_name: string | null;
+  close_person_phone: string | null;
 };
 
 export type TicketRow = {

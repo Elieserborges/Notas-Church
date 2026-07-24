@@ -1,18 +1,19 @@
 -- ============================================================
---  CURA-ME · Ingressos — esquema do banco
+--  FACE A FACE · Inscrições — esquema do banco
 --  Cole e execute este arquivo no Supabase: SQL Editor → Run
+--  Pode rodar quantas vezes quiser: só cria o que estiver faltando.
 -- ============================================================
 
 create extension if not exists pgcrypto;
 
--- Pedidos (um por compra; pode ter vários ingressos)
+-- Inscrições (uma por pessoa)
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   name text not null,
   email text not null,
   phone text not null,
-  quantity integer not null check (quantity >= 1 and quantity <= 10),
+  quantity integer not null default 1 check (quantity >= 1 and quantity <= 10),
   unit_price numeric(10, 2) not null,
   total numeric(10, 2) not null,
   status text not null default 'pending', -- pending | approved | rejected
@@ -21,6 +22,25 @@ create table if not exists public.orders (
   email_sent_at timestamptz,
   email_error text
 );
+
+-- --- Ficha de inscrição (campos do acampamento) ---------------
+-- "add column if not exists" deixa rodar de novo sem erro em bancos
+-- que já existem.
+alter table public.orders
+  add column if not exists birth_date date,
+  add column if not exists cpf text,
+  add column if not exists shirt_size text,
+  add column if not exists family_name text,
+  add column if not exists family_relationship text,
+  add column if not exists family_phone text,
+  add column if not exists payment_method text,
+  add column if not exists uses_medication boolean,
+  add column if not exists medication_details text,
+  add column if not exists climbs_stairs boolean,
+  add column if not exists sleeps_top_bunk boolean,
+  add column if not exists gc_leader text,
+  add column if not exists close_person_name text,
+  add column if not exists close_person_phone text;
 
 -- Ingressos (um por pessoa, com código único)
 create table if not exists public.tickets (

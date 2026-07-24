@@ -31,7 +31,9 @@ export async function POST(req: Request) {
     const db = supabaseAdmin();
     const { data: ordersData, error: oe } = await db
       .from("orders")
-      .select("id,created_at,name,email,phone,quantity,total,status")
+      .select(
+        "id,created_at,name,email,phone,quantity,total,status,birth_date,cpf,shirt_size,family_name,family_relationship,family_phone,payment_method,uses_medication,medication_details,climbs_stairs,sleeps_top_bunk,gc_leader,close_person_name,close_person_phone"
+      )
       .order("created_at", { ascending: false })
       .limit(5000);
     if (oe) throw new Error(oe.message);
@@ -42,9 +44,13 @@ export async function POST(req: Request) {
       .limit(10000);
     if (te) throw new Error(te.message);
 
-    const orders = (ordersData ?? []) as (Pick<
+    const orders = (ordersData ?? []) as (Omit<
       OrderRow,
-      "id" | "created_at" | "name" | "email" | "phone" | "quantity" | "total" | "status"
+      | "unit_price"
+      | "mp_preference_id"
+      | "mp_payment_id"
+      | "email_sent_at"
+      | "email_error"
     >)[];
     const tickets = (ticketsData ?? []) as Pick<
       TicketRow,

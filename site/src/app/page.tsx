@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AuthGate } from "@/components/AuthGate";
+import { TopoAoCarregar } from "@/components/TopoAoCarregar";
 import { EVENT, formatBRL } from "@/lib/event";
 
 function initials(fullName: string): string {
@@ -39,6 +40,8 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      <TopoAoCarregar />
 
       {/* ---------- Aviso: prazo de inscrição ---------- */}
       <div

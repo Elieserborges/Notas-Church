@@ -499,16 +499,18 @@ export function SheetClient() {
                             marginTop: 8,
                           }}
                         >
-                          <button
-                            type="button"
-                            className="sheet-action sheet-action--pagar"
-                            onClick={() => marcarComoPago(o)}
-                            disabled={marcando === o.id || excluindo === o.id}
-                          >
-                            {marcando === o.id
-                              ? "confirmando…"
-                              : "✓ Confirmar pagamento"}
-                          </button>
+                          {o.payment_method === "dinheiro" && (
+                            <button
+                              type="button"
+                              className="sheet-action sheet-action--pagar"
+                              onClick={() => marcarComoPago(o)}
+                              disabled={marcando === o.id || excluindo === o.id}
+                            >
+                              {marcando === o.id
+                                ? "confirmando…"
+                                : "✓ Confirmar pagamento"}
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="sheet-action sheet-action--excluir"

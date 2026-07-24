@@ -7,9 +7,10 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
- * Confirma manualmente o pagamento de uma inscrição (dinheiro, Pix na
- * mão, etc.). Gera os ingressos e dispara o e-mail com o QR Code —
- * igual acontece quando o pagamento cai pelo Mercado Pago.
+ * Confirma manualmente o pagamento de uma inscrição. Só vale para quem
+ * escolheu pagar em DINHEIRO (acertado direto com a equipe) — PIX e
+ * cartão são confirmados sozinhos pelo Mercado Pago. Gera os ingressos
+ * e dispara o e-mail com o QR Code (obreiro não recebe nada disso).
  * Protegida pelo PIN da equipe. body: { pin, orderId }
  */
 export async function POST(req: Request) {
@@ -42,6 +43,32 @@ export async function POST(req: Request) {
   try {
     const db = supabaseAdmin();
 
+    // Busca o pedido antes de mexer em qualquer coisa.
+    const { data: encontrado } = await db
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .maybeSingle();
+    const atual = encontrado as OrderRow | null;
+    if (!atual) {
+      return NextResponse.json(
+        { error: "Inscrição não encontrada." },
+        { status: 404 }
+      );
+    }
+
+    // Confirmação manual é só para dinheiro. PIX e cartão são
+    // confirmados automaticamente pelo Mercado Pago.
+    if (atual.payment_method !== "dinheiro") {
+      return NextResponse.json(
+        {
+          error:
+            "Só dá para confirmar na mão os pagamentos em dinheiro. PIX e cartão são confirmados automaticamente pelo Mercado Pago quando a pessoa paga.",
+        },
+        { status: 400 }
+      );
+    }
+
     // Aprova só quem ainda não estava aprovado (evita e-mail duplicado
     // se dois da equipe clicarem ao mesmo tempo).
     const { data: won } = await db
@@ -51,21 +78,7 @@ export async function POST(req: Request) {
       .neq("status", "approved")
       .select();
 
-    let order = (won?.[0] ?? null) as OrderRow | null;
-    if (!order) {
-      const { data } = await db
-        .from("orders")
-        .select("*")
-        .eq("id", orderId)
-        .maybeSingle();
-      order = data as OrderRow | null;
-      if (!order) {
-        return NextResponse.json(
-          { error: "Inscrição não encontrada." },
-          { status: 404 }
-        );
-      }
-    }
+    const order = (won?.[0] ?? atual) as OrderRow;
 
     // Obreiro não recebe ingresso nem e-mail.
     await entregarIngressos(order);

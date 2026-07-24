@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ContaBar } from "@/components/ContaBar";
 import { EVENT, formatBRL } from "@/lib/event";
 
 function maskPhone(value: string): string {
@@ -187,53 +188,7 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
         organizar a hospedagem e cuidar de você durante o encontro.
       </p>
 
-      {userEmail && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 10,
-            flexWrap: "wrap",
-            background: "var(--cream)",
-            border: "1px solid #eadbc8",
-            borderRadius: 12,
-            padding: "9px 12px",
-            margin: "0 0 18px",
-            fontSize: 13,
-          }}
-        >
-          <span
-            style={{
-              color: "var(--brown)",
-              overflowWrap: "anywhere",
-              minWidth: 0,
-            }}
-          >
-            Conectado como{" "}
-            <strong style={{ color: "var(--brown-dark)" }}>{userEmail}</strong>
-          </span>
-          {onSignOut && (
-            <button
-              type="button"
-              onClick={onSignOut}
-              style={{
-                background: "none",
-                border: "none",
-                padding: 0,
-                font: "inherit",
-                fontWeight: 600,
-                color: "var(--pink)",
-                textDecoration: "underline",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Sair
-            </button>
-          )}
-        </div>
-      )}
+      <ContaBar userEmail={userEmail} onSignOut={onSignOut} />
 
       {error && (
         <p className="form-error" role="alert">

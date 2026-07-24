@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { BuyForm } from "@/components/BuyForm";
+import { MinhaInscricao } from "@/components/MinhaInscricao";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Mode = "entrar" | "criar";
@@ -149,9 +149,11 @@ export function AuthGate() {
     );
   }
 
-  // ---- Já está logado → mostra o formulário de inscrição ------------
+  // ---- Já está logado → mostra a inscrição (ou o formulário) --------
   if (user) {
-    return <BuyForm userEmail={user.email ?? ""} onSignOut={handleSignOut} />;
+    return (
+      <MinhaInscricao userEmail={user.email ?? ""} onSignOut={handleSignOut} />
+    );
   }
 
   // ---- Portão: entrar ou criar conta --------------------------------

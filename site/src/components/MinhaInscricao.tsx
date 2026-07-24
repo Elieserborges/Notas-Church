@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AvisoPrazoPagamento } from "@/components/AvisoPrazoPagamento";
 import { BuyForm } from "@/components/BuyForm";
 import { ContaBar } from "@/components/ContaBar";
 import { EVENT, formatBRL } from "@/lib/event";
@@ -135,25 +136,29 @@ export function MinhaInscricao({ userEmail, onSignOut }: Props) {
             Valor: <strong>{formatBRL(i.total)}</strong>
           </p>
 
-          {i.status === "pending" &&
-            (i.payUrl ? (
-              <>
-                <a className="btn btn-block" href={i.payUrl}>
-                  Pagar agora
-                </a>
-                <p
-                  className="hint"
-                  style={{ textAlign: "center", marginTop: 8 }}
-                >
-                  Pode pagar quando quiser — sua vaga já está guardada.
+          {i.status === "pending" && (
+            <>
+              <AvisoPrazoPagamento />
+              {i.payUrl ? (
+                <>
+                  <a className="btn btn-block" href={i.payUrl}>
+                    Pagar agora
+                  </a>
+                  <p
+                    className="hint"
+                    style={{ textAlign: "center", marginTop: 8 }}
+                  >
+                    Pode pagar quando quiser — sua vaga já está guardada.
+                  </p>
+                </>
+              ) : (
+                <p className="hint">
+                  Acerte o pagamento com a equipe da {EVENT.church}. Sua vaga já
+                  está guardada.
                 </p>
-              </>
-            ) : (
-              <p className="hint">
-                Acerte o pagamento com a equipe da {EVENT.church}. Sua vaga já
-                está guardada.
-              </p>
-            ))}
+              )}
+            </>
+          )}
 
           {i.status === "approved" && (
             <>

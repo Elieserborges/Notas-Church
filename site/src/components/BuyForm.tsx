@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AvisoPrazoPagamento } from "@/components/AvisoPrazoPagamento";
 import { ContaBar } from "@/components/ContaBar";
 import { EVENT, formatBRL } from "@/lib/event";
 
@@ -142,6 +143,8 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
           <strong>quando você quiser</strong> — sua inscrição fica guardada como{" "}
           <strong>pendente</strong> até lá.
         </p>
+
+        <AvisoPrazoPagamento />
 
         <div className="total-row">
           <span className="label">Valor da inscrição</span>

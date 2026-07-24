@@ -40,6 +40,24 @@ export function AuthGate() {
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Guarda, já na montagem, se a pessoa está voltando do login do Google
+  // (o Supabase limpa esses parâmetros da URL logo em seguida).
+  const [voltouDoGoogle] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.location.hash.includes("access_token") ||
+        window.location.search.includes("code="))
+  );
+
+  // Ao voltar do Google já logado, leva a pessoa direto para a inscrição.
+  useEffect(() => {
+    if (user && voltouDoGoogle) {
+      document
+        .getElementById("ingressos")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [user, voltouDoGoogle]);
+
   useEffect(() => {
     let sb: ReturnType<typeof supabaseBrowser>;
     try {
@@ -101,9 +119,11 @@ export function AuthGate() {
     setInfo(null);
     try {
       const sb = supabaseBrowser();
+      // Sem "#" no endereço de retorno: o Supabase usa o próprio "#"
+      // para devolver a sessão, e dois "#" na mesma URL quebram o login.
       const { error: err } = await sb.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/#ingressos` },
+        options: { redirectTo: window.location.origin },
       });
       if (err) throw err;
     } catch (err) {

@@ -100,6 +100,7 @@ export function SheetClient() {
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [marcando, setMarcando] = useState<string | null>(null);
 
   const load = useCallback(async (thePin: string) => {
     setLoading(true);
@@ -152,6 +153,35 @@ export function SheetClient() {
     load(value);
   }
 
+  /** Confirma na mão um pagamento em dinheiro/Pix direto com a equipe. */
+  async function marcarComoPago(o: SheetOrder) {
+    if (!pin) return;
+    const ok = window.confirm(
+      `Confirmar o pagamento de ${o.name}?\n\n` +
+        `Isso marca a inscrição como PAGA, gera o ingresso e envia o ` +
+        `e-mail com o QR Code para ${o.email}.`
+    );
+    if (!ok) return;
+    setMarcando(o.id);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/mark-paid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, orderId: o.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Não foi possível confirmar.");
+      await load(pin);
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Erro ao confirmar o pagamento."
+      );
+    } finally {
+      setMarcando(null);
+    }
+  }
+
   function downloadCSV() {
     if (!orders) return;
     const header = [
@@ -171,7 +201,7 @@ export function SheetClient() {
       "Medicamentos e horarios",
       "Sobe escada",
       "Dorme em cima do beliche",
-      "Lider de GC",
+      "Lider de Celula",
       "Pessoa proxima - nome",
       "Pessoa proxima - telefone",
       "Data da inscricao",
@@ -391,6 +421,23 @@ export function SheetClient() {
                       <span className={`pay-chip pay-${o.status}`}>
                         {STATUS_LABEL[o.status] ?? o.status}
                       </span>
+                      {o.status === "pending" && (
+                        <button
+                          type="button"
+                          className="link-btn"
+                          style={{
+                            display: "block",
+                            marginTop: 5,
+                            whiteSpace: "nowrap",
+                          }}
+                          onClick={() => marcarComoPago(o)}
+                          disabled={marcando === o.id}
+                        >
+                          {marcando === o.id
+                            ? "confirmando…"
+                            : "✓ confirmar pagamento"}
+                        </button>
+                      )}
                     </td>
                     <td>
                       {o.tickets.length === 0 ? (
@@ -465,7 +512,8 @@ export function SheetClient() {
                             {simNao(o.sleeps_top_bunk)}
                           </div>
                           <div>
-                            <strong>Líder de GC:</strong> {dash(o.gc_leader)}
+                            <strong>Líder de Célula:</strong>{" "}
+                            {dash(o.gc_leader)}
                           </div>
                           <div>
                             <strong>Pessoa próxima:</strong>{" "}

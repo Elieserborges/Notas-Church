@@ -21,6 +21,29 @@ function maskCPF(value: string): string {
   return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
 }
 
+function maskDate(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+
+/** "15/08/1990" → "1990-08-15" (null se a data não existir de verdade) */
+function dateToISO(br: string): string | null {
+  const m = br.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null;
+  const [, dd, mm, yyyy] = m;
+  const dt = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
+  if (Number.isNaN(dt.getTime())) return null;
+  // pega casos como 31/02
+  if (dt.getUTCDate() !== Number(dd) || dt.getUTCMonth() + 1 !== Number(mm)) {
+    return null;
+  }
+  const ano = Number(yyyy);
+  if (ano < 1900 || ano > new Date().getFullYear()) return null;
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 const SHIRT_SIZES = ["P", "M", "G", "GG", "EXG"];
 
 const PAYMENT_METHODS = [
@@ -80,12 +103,19 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
     setError(null);
     setLoading(true);
     try {
+      const birthISO = dateToISO(f.birthDate);
+      if (!birthISO) {
+        throw new Error(
+          "Confira a data de nascimento — use o formato dia/mês/ano."
+        );
+      }
       const formData = new FormData(e.currentTarget);
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...f,
+          birthDate: birthISO,
           email: userEmail ?? "",
           website: String(formData.get("website") ?? ""), // honeypot anti-bot
         }),
@@ -158,17 +188,51 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
       </p>
 
       {userEmail && (
-        <p className="hint">
-          Conectado como <strong>{userEmail}</strong>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            flexWrap: "wrap",
+            background: "var(--cream)",
+            border: "1px solid #eadbc8",
+            borderRadius: 12,
+            padding: "9px 12px",
+            margin: "0 0 18px",
+            fontSize: 13,
+          }}
+        >
+          <span
+            style={{
+              color: "var(--brown)",
+              overflowWrap: "anywhere",
+              minWidth: 0,
+            }}
+          >
+            Conectado como{" "}
+            <strong style={{ color: "var(--brown-dark)" }}>{userEmail}</strong>
+          </span>
           {onSignOut && (
-            <>
-              {" · "}
-              <button type="button" className="link-btn" onClick={onSignOut}>
-                Sair
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={onSignOut}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                font: "inherit",
+                fontWeight: 600,
+                color: "var(--pink)",
+                textDecoration: "underline",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Sair
+            </button>
           )}
-        </p>
+        </div>
       )}
 
       {error && (
@@ -199,11 +263,16 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
         <label htmlFor="f-birth">Data de nascimento</label>
         <input
           id="f-birth"
-          type="date"
+          type="text"
+          inputMode="numeric"
+          placeholder="dd/mm/aaaa"
           value={f.birthDate}
-          onChange={(e) => set("birthDate", e.target.value)}
+          onChange={(e) => set("birthDate", maskDate(e.target.value))}
           required
+          minLength={10}
+          maxLength={10}
         />
+        <p className="hint">Digite só os números — ex.: 15081990</p>
       </div>
 
       <div className="field">
@@ -359,11 +428,11 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
       <p style={sectionStyle}>Sua igreja</p>
 
       <div className="field">
-        <label htmlFor="f-gc">Quem é o seu líder de GC?</label>
+        <label htmlFor="f-gc">Quem é o seu líder de Célula?</label>
         <input
           id="f-gc"
           type="text"
-          placeholder="Nome do líder do Grupo de Crescimento"
+          placeholder="Nome do líder da sua célula"
           value={f.gcLeader}
           onChange={(e) => set("gcLeader", e.target.value)}
           required

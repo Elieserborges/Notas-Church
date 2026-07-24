@@ -118,6 +118,7 @@ export function SheetClient() {
   const [tipoFilter, setTipoFilter] = useState<TipoFilter>("todos");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [marcando, setMarcando] = useState<string | null>(null);
+  const [excluindo, setExcluindo] = useState<string | null>(null);
 
   const load = useCallback(async (thePin: string) => {
     setLoading(true);
@@ -196,6 +197,32 @@ export function SheetClient() {
       );
     } finally {
       setMarcando(null);
+    }
+  }
+
+  /** Apaga uma inscrição (desistência, cadastro duplicado etc.). */
+  async function excluirInscricao(o: SheetOrder) {
+    if (!pin) return;
+    const ok = window.confirm(
+      `Excluir a inscrição de ${o.name}?\n\n` +
+        `O registro é apagado de vez e não dá para desfazer.`
+    );
+    if (!ok) return;
+    setExcluindo(o.id);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, orderId: o.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Não foi possível excluir.");
+      await load(pin);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao excluir a inscrição.");
+    } finally {
+      setExcluindo(null);
     }
   }
 
@@ -460,21 +487,34 @@ export function SheetClient() {
                         {STATUS_LABEL[o.status] ?? o.status}
                       </span>
                       {o.status === "pending" && (
-                        <button
-                          type="button"
-                          className="link-btn"
+                        <div
                           style={{
-                            display: "block",
-                            marginTop: 5,
-                            whiteSpace: "nowrap",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                            gap: 6,
+                            marginTop: 8,
                           }}
-                          onClick={() => marcarComoPago(o)}
-                          disabled={marcando === o.id}
                         >
-                          {marcando === o.id
-                            ? "confirmando…"
-                            : "✓ confirmar pagamento"}
-                        </button>
+                          <button
+                            type="button"
+                            className="sheet-action sheet-action--pagar"
+                            onClick={() => marcarComoPago(o)}
+                            disabled={marcando === o.id || excluindo === o.id}
+                          >
+                            {marcando === o.id
+                              ? "confirmando…"
+                              : "✓ Confirmar pagamento"}
+                          </button>
+                          <button
+                            type="button"
+                            className="sheet-action sheet-action--excluir"
+                            onClick={() => excluirInscricao(o)}
+                            disabled={marcando === o.id || excluindo === o.id}
+                          >
+                            {excluindo === o.id ? "excluindo…" : "🗑 Excluir"}
+                          </button>
+                        </div>
                       )}
                     </td>
                     <td>
@@ -498,13 +538,13 @@ export function SheetClient() {
                     <td className="nowrap">{fmtDate(o.created_at)}</td>
                     <td>
                       <button
-                        className="link-btn"
+                        className="sheet-action"
                         type="button"
                         onClick={() =>
                           setExpanded(expanded === o.id ? null : o.id)
                         }
                       >
-                        {expanded === o.id ? "fechar" : "ver"}
+                        {expanded === o.id ? "Fechar" : "Ver"}
                       </button>
                     </td>
                   </tr>
@@ -571,8 +611,8 @@ export function SheetClient() {
 
       <p className="sheet-foot">
         A lista atualiza sozinha a cada minuto. “✓” no ingresso = entrada já
-        confirmada na portaria. Clique em <strong>ver</strong> para abrir a ficha
-        completa da pessoa.
+        confirmada na portaria. Clique em <strong>Ver</strong> para abrir a
+        ficha completa da pessoa.
       </p>
       <p className="team-links">
         <a href="/validar">🎟️ Ir para a validação de ingressos</a>

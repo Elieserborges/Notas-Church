@@ -1483,6 +1483,64 @@ a {
 }
 
 /* ============================================================
+   Botões de ação da planilha (ver / confirmar / excluir)
+   ============================================================ */
+.sheet-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1.5px solid #e6dccd;
+  background: var(--white);
+  color: var(--brown-dark);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.sheet-action:hover:not(:disabled) {
+  background: var(--cream);
+  border-color: #d6c7b2;
+}
+
+.sheet-action:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Confirmar pagamento — verde discreto, ação positiva */
+.sheet-action--pagar {
+  border-color: #bfe3cd;
+  background: #f3fbf6;
+  color: #1b7a43;
+}
+
+.sheet-action--pagar:hover:not(:disabled) {
+  background: #e6f6ec;
+  border-color: #9fd6b5;
+}
+
+/* Excluir — vermelho discreto, ação destrutiva */
+.sheet-action--excluir {
+  border-color: #f0cdcd;
+  background: #fdf6f6;
+  color: #b3261e;
+}
+
+.sheet-action--excluir:hover:not(:disabled) {
+  background: #fbeaea;
+  border-color: #e5adad;
+}
+
+/* ============================================================
    Cabeçalho no celular — margem de segurança para o logo e o
    botão não encostarem na borda nem se espremerem
    ============================================================ */

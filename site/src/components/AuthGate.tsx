@@ -55,14 +55,13 @@ export function AuthGate({ modo = "participante" }: AuthGateProps) {
         window.location.search.includes("code="))
   );
 
-  // Ao voltar do Google já logado, leva a pessoa direto para a inscrição.
+  // Ao voltar do Google já logado, rola até a seção certa de cada página.
   useEffect(() => {
     if (user && voltouDoGoogle) {
-      document
-        .getElementById("ingressos")
-        ?.scrollIntoView({ behavior: "smooth" });
+      const alvo = modo === "obreiro" ? "obreiro" : "ingressos";
+      document.getElementById(alvo)?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [user, voltouDoGoogle]);
+  }, [user, voltouDoGoogle, modo]);
 
   useEffect(() => {
     let sb: ReturnType<typeof supabaseBrowser>;
@@ -125,11 +124,15 @@ export function AuthGate({ modo = "participante" }: AuthGateProps) {
     setInfo(null);
     try {
       const sb = supabaseBrowser();
-      // Sem "#" no endereço de retorno: o Supabase usa o próprio "#"
-      // para devolver a sessão, e dois "#" na mesma URL quebram o login.
+      // Volta para a MESMA página em que a pessoa está (preserva o
+      // caminho, ex.: /souobreiro) — senão o obreiro cairia na inscrição
+      // de participante depois do login. Sem "#" no fim: o Supabase usa o
+      // próprio "#" para devolver a sessão, e dois "#" quebram o login.
       const { error: err } = await sb.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin },
+        options: {
+          redirectTo: window.location.origin + window.location.pathname,
+        },
       });
       if (err) throw err;
     } catch (err) {

@@ -89,6 +89,10 @@ const PAY_LABEL: Record<string, string> = {
   dinheiro: "Dinheiro",
 };
 
+/** Valor líquido estimado: desconta a taxa do Mercado Pago pela forma. */
+const liquidoDe = (total: number, metodo: string | null) =>
+  total * (1 - (EVENT.mpFees[metodo ?? ""] ?? 0));
+
 const dash = (v: string | null) => (v && v.trim() ? v : "—");
 
 type StatusFilter = "todos" | "pending" | "approved";
@@ -240,6 +244,7 @@ export function SheetClient() {
       "Forma de pagamento",
       "Status pagamento",
       "Valor",
+      "Valor liquido (est.)",
       "Familiar - nome",
       "Familiar - parentesco",
       "Familiar - telefone",
@@ -267,6 +272,7 @@ export function SheetClient() {
         o.payment_method ? (PAY_LABEL[o.payment_method] ?? o.payment_method) : "—",
         STATUS_LABEL[o.status] ?? o.status,
         String(o.total).replace(".", ","),
+        liquidoDe(o.total, o.payment_method).toFixed(2).replace(".", ","),
         dash(o.family_name),
         dash(o.family_relationship),
         fmtPhone(o.family_phone ?? ""),
@@ -344,8 +350,10 @@ export function SheetClient() {
     (s, o) => s + o.tickets.filter((t) => t.used_at).length,
     0
   );
-  const revenue = approved.reduce((s, o) => s + o.total, 0);
-  const aReceber = pending.reduce((s, o) => s + o.total, 0);
+  const recebidoLiq = approved.reduce((s, o) => s + liquidoDe(o.total, o.payment_method), 0);
+  const recebidoBruto = approved.reduce((s, o) => s + o.total, 0);
+  const aReceberLiq = pending.reduce((s, o) => s + liquidoDe(o.total, o.payment_method), 0);
+  const aReceberBruto = pending.reduce((s, o) => s + o.total, 0);
 
   const term = fold(filter);
   const visible = all
@@ -383,18 +391,37 @@ export function SheetClient() {
           <span className="stat-label">⏳ Aguardando pagamento</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{formatBRL(revenue)}</span>
-          <span className="stat-label">💰 Recebido</span>
+          <span className="stat-value">{formatBRL(recebidoLiq)}</span>
+          <span className="stat-label">💰 Recebido (líquido)</span>
+          <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
+            bruto {formatBRL(recebidoBruto)}
+          </span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{formatBRL(aReceber)}</span>
-          <span className="stat-label">📌 A receber</span>
+          <span className="stat-value">{formatBRL(aReceberLiq)}</span>
+          <span className="stat-label">📌 A receber (líquido)</span>
+          <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
+            bruto {formatBRL(aReceberBruto)}
+          </span>
         </div>
         <div className="stat-card">
           <span className="stat-value">{enteredCount}</span>
           <span className="stat-label">🚪 Já entraram</span>
         </div>
       </div>
+
+      <p
+        style={{
+          fontSize: 12,
+          color: "var(--brown)",
+          margin: "0 2px 14px",
+          lineHeight: 1.5,
+        }}
+      >
+        💡 <strong>Líquido</strong> = já com as taxas do Mercado Pago descontadas
+        (PIX 0,99% · Cartão 4,98% · Dinheiro sem taxa), estimado pela forma de
+        pagamento escolhida.
+      </p>
 
       <div className="sheet-toolbar">
         <input

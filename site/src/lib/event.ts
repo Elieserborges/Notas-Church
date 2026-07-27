@@ -24,6 +24,8 @@ export const EVENT = {
   workerPrice: 190,
   /** Valor da inscrição de obreiro COM camiseta, em reais */
   workerPriceWithShirt: 230,
+  /** Taxas do Mercado Pago (fração) para estimar o líquido no painel */
+  mpFees: { pix: 0.0099, cartao: 0.0498, dinheiro: 0 } as Record<string, number>,
   /** Máximo de ingressos por compra */
   maxQuantity: 10,
   /** Parcelamento máximo no cartão (1 = só à vista) */

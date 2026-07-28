@@ -135,11 +135,21 @@ create table if not exists public.admin_users (
   added_at timestamptz not null default now()
 );
 
+-- Leads capturados na página "Em breve" (quando o evento não está ativo)
+create table if not exists public.leads (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  email text not null unique,
+  name text,
+  event_id uuid references public.events (id) on delete set null
+);
+
 alter table public.events        enable row level security;
 alter table public.ticket_tiers  enable row level security;
 alter table public.media_assets  enable row level security;
 alter table public.event_secrets enable row level security;
 alter table public.admin_users   enable row level security;
+alter table public.leads         enable row level security;
 -- Sem policies = só o service role (backend) acessa, igual orders/tickets.
 
 -- Ler um segredo já descriptografado (só o backend chama, via RPC).

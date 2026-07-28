@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { TabGeral } from "./TabGeral";
 import { TabLotes } from "./TabLotes";
+import { TabStatus } from "./TabStatus";
 import { TabVisual } from "./TabVisual";
 
 export type EventData = {
@@ -57,6 +58,7 @@ export function AdminShell({
   onSignOut: () => void;
 }) {
   const [tab, setTab] = useState<TabId>("geral");
+  const [status, setStatus] = useState(event.status);
   const [saving, setSaving] = useState(false);
   const [canSave, setCanSave] = useState(false);
   const [toast, setToast] = useState<{ msg: string; kind: "ok" | "error" } | null>(null);
@@ -122,8 +124,8 @@ export function AdminShell({
               <span className="a-crumbs">{meta.crumb}</span>
               <h1>{meta.title}</h1>
             </div>
-            <span className={`a-pill a-pill-${event.status}`}>
-              <span className="a-led" /> {STATUS_LABEL[event.status] ?? event.status}
+            <span className={`a-pill a-pill-${status}`}>
+              <span className="a-led" /> {STATUS_LABEL[status] ?? status}
             </span>
             <div className="a-spacer" />
             <div className="a-admin-chip"><span className="a-av">{initial}</span> {email}</div>
@@ -143,7 +145,7 @@ export function AdminShell({
             {tab === "visual" && <TabVisual event={event} registerSaver={registerSaver} notify={notify} />}
             {tab === "imagens" && <Placeholder title="Imagens" desc="Logo, banner, favicon e galeria." body="Upload direto para o armazenamento do Supabase, com recorte e reordenação." />}
             {tab === "integra" && <Placeholder title="Integrações" desc="Mercado Pago e sincronização." body="Access Token (guardado criptografado, exibido como •••• 4821), Public Key e URL de webhook." />}
-            {tab === "status" && <Placeholder title="Status & Preview" desc="Ativo · Em Breve · Encerrado." body="Um toggle que troca o site para a página “Em Breve” com captura de leads, sem liberar a compra." />}
+            {tab === "status" && <TabStatus current={status} notify={notify} onChanged={setStatus} />}
           </div>
         </div>
       </div>

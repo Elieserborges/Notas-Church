@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { emailDoUsuario } from "@/lib/authServer";
+import { getEventConfig } from "@/lib/config";
 import { EVENT } from "@/lib/event";
 import { mpPreference } from "@/lib/mp";
 import { siteUrl } from "@/lib/site";
@@ -35,6 +36,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Não foi possível processar a inscrição." },
       { status: 400 }
+    );
+  }
+
+  const cfg = await getEventConfig();
+  if (cfg.status !== "active") {
+    return NextResponse.json(
+      { error: "As inscrições não estão abertas no momento." },
+      { status: 403 }
     );
   }
 

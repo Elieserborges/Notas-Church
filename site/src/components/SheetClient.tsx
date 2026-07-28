@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useState } from "react";
+import { useEventConfig } from "@/components/EventConfigProvider";
 import { EVENT, formatBRL } from "@/lib/event";
 
 type SheetOrder = {
@@ -114,6 +115,7 @@ const selectStyle: React.CSSProperties = {
 };
 
 export function SheetClient() {
+  const cfg = useEventConfig();
   const [pin, setPin] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState("");
   const [orders, setOrders] = useState<SheetOrder[] | null>(null);
@@ -302,7 +304,7 @@ export function SheetClient() {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `${EVENT.slug}-inscritos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${cfg.slug}-inscritos-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -312,7 +314,7 @@ export function SheetClient() {
     return (
       <div className="validate-card">
         <form className="form-card" onSubmit={handlePinSubmit}>
-          <p className="form-title">Planilha · {EVENT.name}</p>
+          <p className="form-title">Planilha · {cfg.name}</p>
           <p className="form-sub">
             Área da equipe. Digite o PIN para ver os inscritos.
           </p>
@@ -376,7 +378,7 @@ export function SheetClient() {
     <div className="sheet-wrap">
       <div className="v-topbar">
         <strong style={{ color: "var(--brown-dark)" }}>
-          📋 Inscritos · {EVENT.name}
+          📋 Inscritos · {cfg.name}
         </strong>
         <button
           className="link-btn"

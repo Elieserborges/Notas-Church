@@ -3,7 +3,7 @@
 import jsQR from "jsqr";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EVENT } from "@/lib/event";
+import { useEventConfig } from "@/components/EventConfigProvider";
 
 type Result =
   | {
@@ -50,6 +50,7 @@ function codeFromScan(text: string): string {
 }
 
 export function ValidateClient() {
+  const cfg = useEventConfig();
   const params = useSearchParams();
   const [pin, setPin] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState("");
@@ -218,7 +219,7 @@ export function ValidateClient() {
     return (
       <div className="validate-card">
         <form className="form-card" onSubmit={handlePinSubmit}>
-          <p className="form-title">Portaria · {EVENT.name}</p>
+          <p className="form-title">Portaria · {cfg.name}</p>
           <p className="form-sub">
             Área da equipe. Digite o PIN para validar os ingressos.
           </p>
@@ -348,7 +349,7 @@ export function ValidateClient() {
                     type="text"
                     autoComplete="off"
                     autoCapitalize="characters"
-                    placeholder={`${EVENT.codePrefix}-XXXX-XXXX`}
+                    placeholder={`${cfg.codePrefix}-XXXX-XXXX`}
                     aria-label="Código do ingresso"
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}

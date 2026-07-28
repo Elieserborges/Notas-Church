@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
-import { EVENT, formatBRL } from "./event";
+import { getEventConfig } from "./config";
+import { formatBRL } from "./event";
 import { siteUrl } from "./site";
 import type { OrderRow, TicketRow } from "./types";
 
@@ -56,6 +57,7 @@ export async function sendTicketsEmail(
   order: OrderRow,
   tickets: TicketRow[]
 ): Promise<void> {
+  const cfg = await getEventConfig();
   const t = transporter();
   const site = siteUrl();
   const firstName = order.name.trim().split(/\s+/)[0];
@@ -71,11 +73,11 @@ export async function sendTicketsEmail(
           <tr>
             <td style="background:${P.pink};padding:32px 24px;text-align:center;">
               <p style="margin:0 0 4px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${P.yellow};font-weight:bold;">
-                ${EVENT.church}
+                ${cfg.church}
               </p>
-              <h1 style="margin:0;font-size:36px;color:#ffffff;">${EVENT.name}</h1>
+              <h1 style="margin:0;font-size:36px;color:#ffffff;">${cfg.name}</h1>
               <p style="margin:6px 0 0;font-style:italic;color:${P.yellow};font-size:15px;">
-                ${EVENT.tagline}
+                ${cfg.tagline}
               </p>
             </td>
           </tr>
@@ -96,9 +98,9 @@ export async function sendTicketsEmail(
                 style="background:${P.yellow};border-radius:14px;margin:6px 0 20px;">
                 <tr>
                   <td style="padding:16px 20px;font-size:14px;line-height:1.8;color:${P.brownDark};">
-                    <strong>Data:</strong> ${EVENT.dateLabel}<br/>
-                    <strong>Horário:</strong> ${EVENT.timeLabel}<br/>
-                    <strong>Local:</strong> ${EVENT.addressLabel}<br/>
+                    <strong>Data:</strong> ${cfg.dateLabel}<br/>
+                    <strong>Horário:</strong> ${cfg.timeLabel}<br/>
+                    <strong>Local:</strong> ${cfg.addressLabel}<br/>
                     <strong>Valor pago:</strong> ${formatBRL(Number(order.total))}
                   </td>
                 </tr>
@@ -112,7 +114,7 @@ export async function sendTicketsEmail(
           <tr>
             <td style="background:${P.cream};padding:18px 24px;text-align:center;">
               <p style="margin:0;font-size:12px;color:${P.brown};">
-                ${EVENT.church} · ${EVENT.addressLabel}
+                ${cfg.church} · ${cfg.addressLabel}
               </p>
             </td>
           </tr>
@@ -132,21 +134,21 @@ export async function sendTicketsEmail(
     ``,
     ...tickets.map((tk) => `- ${tk.code}  →  ${site}/ingresso/${tk.code}`),
     ``,
-    `Data: ${EVENT.dateLabel}`,
-    `Horário: ${EVENT.timeLabel}`,
-    `Local: ${EVENT.addressLabel}`,
+    `Data: ${cfg.dateLabel}`,
+    `Horário: ${cfg.timeLabel}`,
+    `Local: ${cfg.addressLabel}`,
     `Valor pago: ${formatBRL(Number(order.total))}`,
     ``,
     `Apresente o QR Code (ou o código acima) na entrada do evento.`,
     ``,
-    `${EVENT.church}`,
+    `${cfg.church}`,
   ].join("\n");
 
-  const fromName = process.env.MAIL_FROM_NAME || EVENT.church;
+  const fromName = process.env.MAIL_FROM_NAME || cfg.church;
   await t.sendMail({
     from: `"${fromName}" <${process.env.SMTP_USER}>`,
     to: order.email,
-    subject: `Seu ingresso — ${EVENT.name} · ${EVENT.dateLabel}`,
+    subject: `Seu ingresso — ${cfg.name} · ${cfg.dateLabel}`,
     text,
     html,
   });

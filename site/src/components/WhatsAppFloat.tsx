@@ -1,12 +1,8 @@
-import { EVENT } from "@/lib/event";
-
 const MENSAGEM = "PRECISO DE AJUDA COM MINHA INSCRIÇÃO.";
 
 /** Botão flutuante de WhatsApp para quem precisa de ajuda com a inscrição. */
-export function WhatsAppFloat() {
-  const href = `https://wa.me/${EVENT.supportWhatsapp}?text=${encodeURIComponent(
-    MENSAGEM
-  )}`;
+export function WhatsAppFloat({ whatsapp }: { whatsapp: string }) {
+  const href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(MENSAGEM)}`;
   return (
     <a
       href={href}

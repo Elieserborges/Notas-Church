@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Playfair_Display } from "next/font/google";
+import { EventConfigProvider } from "@/components/EventConfigProvider";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { getEventConfig } from "@/lib/config";
 import { formatBRL } from "@/lib/event";
@@ -22,6 +23,10 @@ const playfair = Playfair_Display({
 const metadataBase = new URL(
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 );
+
+// O site depende da config do painel (textos, cores, status) → sempre
+// renderiza no servidor, para as mudanças aparecerem sem novo deploy.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getEventConfig();
@@ -60,8 +65,8 @@ export default async function RootLayout({
       <body>
         {/* Cores do painel sobrescrevem as variáveis CSS. Vazio = padrão. */}
         {css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null}
-        {children}
-        <WhatsAppFloat />
+        <EventConfigProvider value={config}>{children}</EventConfigProvider>
+        <WhatsAppFloat whatsapp={config.supportWhatsapp} />
       </body>
     </html>
   );

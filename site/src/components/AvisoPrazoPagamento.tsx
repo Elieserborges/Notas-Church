@@ -1,12 +1,13 @@
 "use client";
 
-import { EVENT } from "@/lib/event";
+import { useEventConfig } from "@/components/EventConfigProvider";
 
 /**
  * Aviso destacado do prazo para pagar. Usa a mesma data do aviso do topo
- * do site (event.ts), para os dois nunca ficarem diferentes.
+ * do site, para os dois nunca ficarem diferentes.
  */
 export function AvisoPrazoPagamento() {
+  const cfg = useEventConfig();
   return (
     <p
       style={{
@@ -21,7 +22,7 @@ export function AvisoPrazoPagamento() {
         textAlign: "center",
       }}
     >
-      O pagamento pode ser realizado até dia {EVENT.registrationDeadlineLabel}.
+      O pagamento pode ser realizado até dia {cfg.registrationDeadlineLabel}.
     </p>
   );
 }

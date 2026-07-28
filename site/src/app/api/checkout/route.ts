@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getEventConfig } from "@/lib/config";
 import { EVENT } from "@/lib/event";
 import { mpPreference } from "@/lib/mp";
 import { siteUrl } from "@/lib/site";
@@ -29,6 +30,10 @@ export async function POST(req: Request) {
   }
 
   if (str(body.website)) return bad("Não foi possível processar a inscrição.");
+
+  const cfg = await getEventConfig();
+  if (cfg.status !== "active")
+    return bad("As inscrições não estão abertas no momento.", 403);
 
   // ---- Dados pessoais ----
   const name = str(body.name);

@@ -1,7 +1,8 @@
-import { EVENT } from "@/lib/event";
+import { getEventConfig } from "@/lib/config";
 
 /** Faixa amarela do topo com o prazo das inscrições. */
-export function FaixaPrazo() {
+export async function FaixaPrazo() {
+  const cfg = await getEventConfig();
   return (
     <div
       role="note"
@@ -16,7 +17,7 @@ export function FaixaPrazo() {
         letterSpacing: "0.03em",
       }}
     >
-      Inscrições até dia {EVENT.registrationDeadlineLabel}
+      Inscrições até dia {cfg.registrationDeadlineLabel}
     </div>
   );
 }

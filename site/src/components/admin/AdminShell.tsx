@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { TabGeral } from "./TabGeral";
 import { TabLotes } from "./TabLotes";
+import { TabVisual } from "./TabVisual";
 
 export type EventData = {
   id: string;
@@ -139,7 +140,7 @@ export function AdminShell({
             )}
             {tab === "lotes" && <TabLotes notify={notify} />}
 
-            {tab === "visual" && <Placeholder title="Identidade Visual" desc="Cores do evento com preview ao vivo." body="Color pickers para as cores primária, títulos, fundo e destaque — com prévia instantânea." />}
+            {tab === "visual" && <TabVisual event={event} registerSaver={registerSaver} notify={notify} />}
             {tab === "imagens" && <Placeholder title="Imagens" desc="Logo, banner, favicon e galeria." body="Upload direto para o armazenamento do Supabase, com recorte e reordenação." />}
             {tab === "integra" && <Placeholder title="Integrações" desc="Mercado Pago e sincronização." body="Access Token (guardado criptografado, exibido como •••• 4821), Public Key e URL de webhook." />}
             {tab === "status" && <Placeholder title="Status & Preview" desc="Ativo · Em Breve · Encerrado." body="Um toggle que troca o site para a página “Em Breve” com captura de leads, sem liberar a compra." />}

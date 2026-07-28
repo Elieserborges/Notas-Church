@@ -17,6 +17,7 @@ export default async function Home() {
   if (cfg.status !== "active") return <ComingSoon />;
   const hasSpeakers = cfg.speakers.length > 0;
   const hasMap = Boolean(cfg.mapsUrl);
+  const banner = cfg.branding.banner || "/face-a-face-banner.jpeg";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -30,7 +31,7 @@ export default async function Home() {
       name: cfg.church,
       address: cfg.addressLabel,
     },
-    image: ["/face-a-face-banner.jpeg"],
+    image: [banner],
     organizer: { "@type": "Organization", name: cfg.church },
     offers: {
       "@type": "Offer",
@@ -124,7 +125,7 @@ export default async function Home() {
             </div>
             <div className="hero-art">
               <Image
-                src="/face-a-face-banner.jpeg"
+                src={banner}
                 alt={`Arte oficial do evento ${cfg.name} — ${cfg.audience}, ${cfg.dateLabel}`}
                 width={1280}
                 height={720}

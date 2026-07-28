@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { TabGeral } from "./TabGeral";
+import { TabImagens } from "./TabImagens";
 import { TabLotes } from "./TabLotes";
 import { TabStatus } from "./TabStatus";
 import { TabVisual } from "./TabVisual";
@@ -24,10 +25,10 @@ type TabId = "geral" | "lotes" | "visual" | "imagens" | "integra" | "status";
 const TABS: { id: TabId; label: string; crumb: string; title: string; ready?: boolean }[] = [
   { id: "geral", label: "Geral", crumb: "Configurações · Geral", title: "Informações gerais", ready: true },
   { id: "lotes", label: "Lotes & Preços", crumb: "Configurações · Lotes & Preços", title: "Lotes & preços", ready: true },
-  { id: "visual", label: "Identidade Visual", crumb: "Configurações · Identidade Visual", title: "Identidade visual" },
-  { id: "imagens", label: "Imagens", crumb: "Configurações · Imagens", title: "Imagens" },
+  { id: "visual", label: "Identidade Visual", crumb: "Configurações · Identidade Visual", title: "Identidade visual", ready: true },
+  { id: "imagens", label: "Imagens", crumb: "Configurações · Imagens", title: "Imagens", ready: true },
   { id: "integra", label: "Integrações", crumb: "Configurações · Integrações", title: "Integrações" },
-  { id: "status", label: "Status & Preview", crumb: "Configurações · Status", title: "Status & preview" },
+  { id: "status", label: "Status & Preview", crumb: "Configurações · Status", title: "Status & preview", ready: true },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -143,7 +144,7 @@ export function AdminShell({
             {tab === "lotes" && <TabLotes notify={notify} />}
 
             {tab === "visual" && <TabVisual event={event} registerSaver={registerSaver} notify={notify} />}
-            {tab === "imagens" && <Placeholder title="Imagens" desc="Logo, banner, favicon e galeria." body="Upload direto para o armazenamento do Supabase, com recorte e reordenação." />}
+            {tab === "imagens" && <TabImagens event={event} notify={notify} />}
             {tab === "integra" && <Placeholder title="Integrações" desc="Mercado Pago e sincronização." body="Access Token (guardado criptografado, exibido como •••• 4821), Public Key e URL de webhook." />}
             {tab === "status" && <TabStatus current={status} notify={notify} onChanged={setStatus} />}
           </div>

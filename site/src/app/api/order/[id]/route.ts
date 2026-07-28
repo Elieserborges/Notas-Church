@@ -48,7 +48,8 @@ export async function GET(
     }
 
     let tickets: { code: string; used_at: string | null }[] = [];
-    if (order.status === "approved") {
+    // Obreiro não recebe ingresso nem e-mail (mesma trava de entregarIngressos).
+    if (order.status === "approved" && order.tipo !== "obreiro") {
       const full = await ensureTickets(order.id, order.quantity);
       await trySendTicketsEmail(order, full);
       tickets = full.map((t) => ({ code: t.code, used_at: t.used_at }));

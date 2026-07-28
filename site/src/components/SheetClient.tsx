@@ -79,6 +79,7 @@ function simNao(v: boolean | null): string {
 
 const STATUS_LABEL: Record<string, string> = {
   approved: "Pago",
+  cortesia: "Cortesia",
   pending: "Pendente",
   rejected: "Recusado",
 };
@@ -95,7 +96,7 @@ const liquidoDe = (total: number, metodo: string | null) =>
 
 const dash = (v: string | null) => (v && v.trim() ? v : "—");
 
-type StatusFilter = "todos" | "pending" | "approved";
+type StatusFilter = "todos" | "pending" | "approved" | "cortesia";
 type TipoFilter = "todos" | "participante" | "obreiro";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -272,7 +273,12 @@ export function SheetClient() {
         o.payment_method ? (PAY_LABEL[o.payment_method] ?? o.payment_method) : "—",
         STATUS_LABEL[o.status] ?? o.status,
         String(o.total).replace(".", ","),
-        liquidoDe(o.total, o.payment_method).toFixed(2).replace(".", ","),
+        (o.status === "cortesia"
+          ? 0
+          : liquidoDe(o.total, o.payment_method)
+        )
+          .toFixed(2)
+          .replace(".", ","),
         dash(o.family_name),
         dash(o.family_relationship),
         fmtPhone(o.family_phone ?? ""),
@@ -344,8 +350,12 @@ export function SheetClient() {
   ).length;
   const qtdObreiros = todas.filter((o) => tipoDe(o) === "obreiro").length;
   const approved = all.filter((o) => o.status === "approved");
+  // Cortesia = confirmado/presente, mas sem receita (ex.: cartão emprestado
+  // com 100% de abatimento). Conta como pago no total de pessoas, mas fica
+  // de fora de tudo que é dinheiro (recebido e a receber).
+  const cortesia = all.filter((o) => o.status === "cortesia");
   const pending = all.filter((o) => o.status === "pending");
-  const paidPeople = approved.length;
+  const paidPeople = approved.length + cortesia.length;
   const enteredCount = all.reduce(
     (s, o) => s + o.tickets.filter((t) => t.used_at).length,
     0
@@ -385,6 +395,11 @@ export function SheetClient() {
         <div className="stat-card">
           <span className="stat-value">{paidPeople}</span>
           <span className="stat-label">✅ Pagos</span>
+          {cortesia.length > 0 && (
+            <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
+              inclui {cortesia.length} cortesia (sem receita)
+            </span>
+          )}
         </div>
         <div className="stat-card">
           <span className="stat-value">{pending.length}</span>
@@ -454,6 +469,9 @@ export function SheetClient() {
             Só quem falta pagar ({pending.length})
           </option>
           <option value="approved">Só quem já pagou ({approved.length})</option>
+          {cortesia.length > 0 && (
+            <option value="cortesia">Cortesia ({cortesia.length})</option>
+          )}
         </select>
         <button
           className="btn btn-sm btn-outline"

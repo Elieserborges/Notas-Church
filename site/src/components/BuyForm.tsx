@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { AvisoPrazoPagamento } from "@/components/AvisoPrazoPagamento";
 import { ContaBar } from "@/components/ContaBar";
-import { EVENT, formatBRL } from "@/lib/event";
+import { useEventConfig } from "@/components/EventConfigProvider";
+import { formatBRL } from "@/lib/event";
 
 function maskPhone(value: string): string {
   const d = value.replace(/\D/g, "").slice(0, 11);
@@ -91,6 +92,7 @@ type BuyFormProps = {
 type Done = { orderId: string; payUrl: string | null };
 
 export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
+  const cfg = useEventConfig();
   const [f, setF] = useState({ ...EMPTY });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +150,7 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
 
         <div className="total-row">
           <span className="label">Valor da inscrição</span>
-          <span className="value">{formatBRL(EVENT.price)}</span>
+          <span className="value">{formatBRL(cfg.price)}</span>
         </div>
 
         {done.payUrl ? (
@@ -158,7 +160,7 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
         ) : (
           <p className="hint">
             Em breve o pagamento online estará disponível. Enquanto isso, acerte
-            com a equipe da {EVENT.church} pela forma que você escolheu.
+            com a equipe da {cfg.church} pela forma que você escolheu.
           </p>
         )}
 
@@ -463,7 +465,7 @@ export function BuyForm({ userEmail, onSignOut }: BuyFormProps) {
 
       <div className="total-row">
         <span className="label">Valor da inscrição</span>
-        <span className="value">{formatBRL(EVENT.price)}</span>
+        <span className="value">{formatBRL(cfg.price)}</span>
       </div>
 
       <button className="btn btn-block" type="submit" disabled={loading}>

@@ -11,6 +11,10 @@
 
 import { EVENT } from "./event";
 import { supabaseAdmin } from "./supabase";
+import { DEFAULT_THEME, THEME_TO_CSSVAR, themeCss } from "./theme";
+
+// Reexporta para quem já importava daqui.
+export { DEFAULT_THEME, THEME_TO_CSSVAR, themeCss };
 
 export type EventStatus = "active" | "coming_soon" | "closed";
 
@@ -71,32 +75,6 @@ export type EventConfig = {
   branding: Branding;
   integrations: Integrations;
   tiers: TierConfig[];
-};
-
-/** Cores padrão (valores atuais de globals.css). */
-export const DEFAULT_THEME: Record<string, string> = {
-  primary: "#2429d6",
-  primaryStrong: "#181ca8",
-  primarySoft: "#aeb6ff",
-  primaryFaint: "#e3e6ff",
-  highlight: "#dce2ff",
-  bg: "#f6f7ff",
-  textSoft: "#5a6096",
-  titles: "#14184f",
-  ink: "#12142e",
-};
-
-/** Cada chave de tema mapeia para uma variável CSS já existente. */
-export const THEME_TO_CSSVAR: Record<string, string> = {
-  primary: "--pink",
-  primaryStrong: "--pink-strong",
-  primarySoft: "--pink-soft",
-  primaryFaint: "--pink-faint",
-  highlight: "--yellow",
-  bg: "--cream",
-  textSoft: "--brown",
-  titles: "--brown-dark",
-  ink: "--ink",
 };
 
 const STRING_KEYS = [
@@ -262,13 +240,4 @@ export async function getEventConfig(): Promise<EventConfig> {
 /** Limpa o cache — chamar depois de salvar algo no painel. */
 export function clearConfigCache(): void {
   cache = null;
-}
-
-/** Gera o CSS de override do tema, para injetar no <head> (Passo 3). */
-export function themeCss(theme: Record<string, string>): string {
-  const rules = Object.entries(THEME_TO_CSSVAR)
-    .filter(([k]) => theme[k])
-    .map(([k, cssVar]) => `${cssVar}:${theme[k]}`)
-    .join(";");
-  return rules ? `:root{${rules}}` : "";
 }

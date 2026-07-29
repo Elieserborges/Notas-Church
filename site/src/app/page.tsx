@@ -1,35 +1,41 @@
 import Image from "next/image";
 import { AuthGate } from "@/components/AuthGate";
+import { ComingSoon } from "@/components/ComingSoon";
 import { FaixaPrazo } from "@/components/FaixaPrazo";
 import { TopoAoCarregar } from "@/components/TopoAoCarregar";
-import { EVENT, formatBRL } from "@/lib/event";
+import { getEventConfig } from "@/lib/config";
+import { formatBRL } from "@/lib/event";
 
 function initials(fullName: string): string {
   const parts = fullName.replace(/^Pr[a]?\.\s*/i, "").trim().split(/\s+/);
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-export default function Home() {
-  const hasSpeakers = EVENT.speakers.length > 0;
-  const hasMap = Boolean(EVENT.mapsUrl);
+export default async function Home() {
+  const cfg = await getEventConfig();
+  // Evento não ativo → landing "Em breve"/"Encerrado", sem liberar compra.
+  if (cfg.status !== "active") return <ComingSoon />;
+  const hasSpeakers = cfg.speakers.length > 0;
+  const hasMap = Boolean(cfg.mapsUrl);
+  const banner = cfg.branding.banner || "/face-a-face-banner.jpeg";
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: `${EVENT.name} — ${EVENT.tagline}`,
-    startDate: EVENT.isoStart,
-    endDate: EVENT.isoEnd,
+    name: `${cfg.name} — ${cfg.tagline}`,
+    startDate: cfg.isoStart,
+    endDate: cfg.isoEnd,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location: {
       "@type": "Place",
-      name: EVENT.church,
-      address: EVENT.addressLabel,
+      name: cfg.church,
+      address: cfg.addressLabel,
     },
-    image: ["/face-a-face-banner.jpeg"],
-    organizer: { "@type": "Organization", name: EVENT.church },
+    image: [banner],
+    organizer: { "@type": "Organization", name: cfg.church },
     offers: {
       "@type": "Offer",
-      price: EVENT.price,
+      price: cfg.price,
       priceCurrency: "BRL",
       availability: "https://schema.org/InStock",
     },
@@ -52,7 +58,7 @@ export default function Home() {
         <div className="container header-inner">
           <a className="brand" href="#">
             <span className="brand-mark">FF</span>
-            <span className="brand-name">{EVENT.church}</span>
+            <span className="brand-name">{cfg.church}</span>
           </a>
           <nav className="nav">
             {hasSpeakers && <a href="#preletores">Preletores</a>}
@@ -73,33 +79,33 @@ export default function Home() {
         <section className="hero">
           <div className="container hero-grid">
             <div>
-              <span className="hero-kicker">{EVENT.church} apresenta</span>
-              <h1 className="display hero-title">{EVENT.name}</h1>
-              <p className="hero-tagline">{EVENT.tagline}</p>
+              <span className="hero-kicker">{cfg.church} apresenta</span>
+              <h1 className="display hero-title">{cfg.name}</h1>
+              <p className="hero-tagline">{cfg.tagline}</p>
               <p className="hero-sub">
                 Dois dias de palavra, comunhão e desafio — um encontro{" "}
-                {EVENT.audience}. Chega mais: essa mesa também é sua.
+                {cfg.audience}. Chega mais: essa mesa também é sua.
               </p>
               <div className="hero-chips">
-                <span className="chip">📅 {EVENT.dateLabel}</span>
-                <span className="chip">🕓 {EVENT.timeLabel}</span>
+                <span className="chip">📅 {cfg.dateLabel}</span>
+                <span className="chip">🕓 {cfg.timeLabel}</span>
                 <span className="chip">
                   📍{" "}
                   {hasMap ? (
-                    <a href={EVENT.mapsUrl} target="_blank" rel="noreferrer">
-                      {EVENT.addressLabel}
+                    <a href={cfg.mapsUrl} target="_blank" rel="noreferrer">
+                      {cfg.addressLabel}
                     </a>
                   ) : (
-                    EVENT.addressLabel
+                    cfg.addressLabel
                   )}
                 </span>
               </div>
               <div className="price-badge">
                 <span className="label">Inscrição</span>
-                <span className="value">{formatBRL(EVENT.price)}</span>
+                <span className="value">{formatBRL(cfg.price)}</span>
               </div>
               <p className="pay-note">
-                💳 Pix à vista ou em até {EVENT.maxInstallments}x no cartão
+                💳 Pix à vista ou em até {cfg.maxInstallments}x no cartão
               </p>
               <div className="hero-cta">
                 <a className="btn" href="#ingressos">
@@ -108,7 +114,7 @@ export default function Home() {
                 {hasMap && (
                   <a
                     className="btn btn-outline"
-                    href={EVENT.mapsUrl}
+                    href={cfg.mapsUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -119,8 +125,8 @@ export default function Home() {
             </div>
             <div className="hero-art">
               <Image
-                src="/face-a-face-banner.jpeg"
-                alt={`Arte oficial do evento ${EVENT.name} — ${EVENT.audience}, ${EVENT.dateLabel}`}
+                src={banner}
+                alt={`Arte oficial do evento ${cfg.name} — ${cfg.audience}, ${cfg.dateLabel}`}
                 width={1280}
                 height={720}
                 priority
@@ -138,7 +144,7 @@ export default function Home() {
                 <h2 className="display section-title">Preletores</h2>
               </div>
               <div className="speakers-grid">
-                {EVENT.speakers.map((s) => (
+                {cfg.speakers.map((s) => (
                   <div className="speaker-card" key={s}>
                     <div className="speaker-avatar">{initials(s)}</div>
                     <p className="speaker-role">Preletor</p>
@@ -161,9 +167,9 @@ export default function Home() {
                 <div className="info-icon">📍</div>
                 <h3>Local</h3>
                 <p>
-                  {EVENT.addressLabel}.{" "}
+                  {cfg.addressLabel}.{" "}
                   {hasMap && (
-                    <a href={EVENT.mapsUrl} target="_blank" rel="noreferrer">
+                    <a href={cfg.mapsUrl} target="_blank" rel="noreferrer">
                       Ver no mapa →
                     </a>
                   )}
@@ -173,14 +179,14 @@ export default function Home() {
                 <div className="info-icon">🕓</div>
                 <h3>Data e horário</h3>
                 <p>
-                  {EVENT.dateLabel}. {EVENT.timeLabel}.
+                  {cfg.dateLabel}. {cfg.timeLabel}.
                 </p>
               </div>
               <div className="info-card">
                 <div className="info-icon">🎟️</div>
                 <h3>Inscrição digital</h3>
                 <p>
-                  Pague com Pix ou em até {EVENT.maxInstallments}x no cartão
+                  Pague com Pix ou em até {cfg.maxInstallments}x no cartão
                   pelo Mercado Pago e receba o QR Code no seu e-mail. É só
                   apresentar na entrada.
                 </p>
@@ -195,9 +201,9 @@ export default function Home() {
             <div className="buy-side">
               <h2 className="display">Garanta sua vaga</h2>
               <p>
-                Inscrição de <strong>{formatBRL(EVENT.price)}</strong> por
+                Inscrição de <strong>{formatBRL(cfg.price)}</strong> por
                 pessoa — Pix à vista ou em até{" "}
-                <strong>{EVENT.maxInstallments}x no cartão</strong>. Comprando
+                <strong>{cfg.maxInstallments}x no cartão</strong>. Comprando
                 para os amigos? Aumente a quantidade: cada um recebe o próprio
                 QR Code.
               </p>
@@ -245,14 +251,14 @@ export default function Home() {
                 <summary>Quais formas de pagamento?</summary>
                 <p>
                   Pix à vista ou cartão de crédito em até{" "}
-                  {EVENT.maxInstallments}x, pelo ambiente seguro do Mercado
+                  {cfg.maxInstallments}x, pelo ambiente seguro do Mercado
                   Pago. No Pix a confirmação leva só alguns segundos.
                 </p>
               </details>
               <details>
                 <summary>Posso inscrever mais de uma pessoa?</summary>
                 <p>
-                  Pode! Escolha a quantidade (até {EVENT.maxQuantity} por
+                  Pode! Escolha a quantidade (até {cfg.maxQuantity} por
                   compra). Cada inscrição tem um QR Code próprio — é só
                   encaminhar para cada um.
                 </p>
@@ -261,7 +267,7 @@ export default function Home() {
                 <summary>Não recebi o e-mail. E agora?</summary>
                 <p>
                   Confira a caixa de spam/lixo eletrônico. Se não estiver lá,
-                  fale com a organização da {EVENT.church} levando o comprovante
+                  fale com a organização da {cfg.church} levando o comprovante
                   do pagamento — seu pedido fica registrado no sistema.
                 </p>
               </details>
@@ -275,10 +281,10 @@ export default function Home() {
         <div className="container footer-inner">
           <div className="brand">
             <span className="brand-mark">FF</span>
-            <span className="brand-name">{EVENT.church}</span>
+            <span className="brand-name">{cfg.church}</span>
           </div>
           <p>
-            {EVENT.name} · {EVENT.dateLabel} · {EVENT.addressLabel}
+            {cfg.name} · {cfg.dateLabel} · {cfg.addressLabel}
           </p>
           <a className="footer-admin" href="/planilha">
             📋 Planilha

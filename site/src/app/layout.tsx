@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Playfair_Display } from "next/font/google";
+import { EventConfigProvider } from "@/components/EventConfigProvider";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
-import { EVENT, formatBRL } from "@/lib/event";
+import { getEventConfig } from "@/lib/config";
+import { formatBRL } from "@/lib/event";
+import { themeCss } from "@/lib/theme";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -17,35 +20,54 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const title = `${EVENT.name} · ${EVENT.dateLabel} · ${EVENT.church}`;
-const description = `${EVENT.tagline}. ${EVENT.dateLabel} — ${EVENT.addressLabel}. Inscrição: ${formatBRL(EVENT.price)}, via Pix ou em até ${EVENT.maxInstallments}x no cartão.`;
+const metadataBase = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+);
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  title,
-  description,
-  openGraph: {
+// O site depende da config do painel (textos, cores, status) → sempre
+// renderiza no servidor, para as mudanças aparecerem sem novo deploy.
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getEventConfig();
+  const title = `${c.name} · ${c.dateLabel} · ${c.church}`;
+  const description = `${c.tagline}. ${c.dateLabel} — ${c.addressLabel}. Inscrição: ${formatBRL(
+    c.price
+  )}, via Pix ou em até ${c.maxInstallments}x no cartão.`;
+  const banner = c.branding.banner || "/face-a-face-banner.jpeg";
+  return {
+    metadataBase,
     title,
     description,
-    images: ["/face-a-face-banner.jpeg"],
-    locale: "pt_BR",
-    type: "website",
-    siteName: EVENT.church,
-  },
-};
+    ...(c.branding.favicon ? { icons: { icon: c.branding.favicon } } : {}),
+    openGraph: {
+      title,
+      description,
+      images: [banner],
+      locale: "pt_BR",
+      type: "website",
+      siteName: c.church,
+    },
+  };
+}
 
-export const viewport: Viewport = {
-  themeColor: "#2328D6",
-};
+export async function generateViewport(): Promise<Viewport> {
+  const c = await getEventConfig();
+  return { themeColor: c.theme.primary || "#2328D6" };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const config = await getEventConfig();
+  const css = themeCss(config.theme);
   return (
     <html lang="pt-BR" className={`${montserrat.variable} ${playfair.variable}`}>
       <body>
-        {children}
-        <WhatsAppFloat />
+        {/* Cores do painel sobrescrevem as variáveis CSS. Vazio = padrão. */}
+        {css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null}
+        <EventConfigProvider value={config}>{children}</EventConfigProvider>
+        <WhatsAppFloat whatsapp={config.supportWhatsapp} />
       </body>
     </html>
   );

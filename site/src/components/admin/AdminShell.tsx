@@ -2,7 +2,10 @@
 
 import { useCallback, useRef, useState } from "react";
 import { TabGeral } from "./TabGeral";
+import { TabImagens } from "./TabImagens";
 import { TabLotes } from "./TabLotes";
+import { TabStatus } from "./TabStatus";
+import { TabVisual } from "./TabVisual";
 
 export type EventData = {
   id: string;
@@ -22,10 +25,10 @@ type TabId = "geral" | "lotes" | "visual" | "imagens" | "integra" | "status";
 const TABS: { id: TabId; label: string; crumb: string; title: string; ready?: boolean }[] = [
   { id: "geral", label: "Geral", crumb: "Configurações · Geral", title: "Informações gerais", ready: true },
   { id: "lotes", label: "Lotes & Preços", crumb: "Configurações · Lotes & Preços", title: "Lotes & preços", ready: true },
-  { id: "visual", label: "Identidade Visual", crumb: "Configurações · Identidade Visual", title: "Identidade visual" },
-  { id: "imagens", label: "Imagens", crumb: "Configurações · Imagens", title: "Imagens" },
+  { id: "visual", label: "Identidade Visual", crumb: "Configurações · Identidade Visual", title: "Identidade visual", ready: true },
+  { id: "imagens", label: "Imagens", crumb: "Configurações · Imagens", title: "Imagens", ready: true },
   { id: "integra", label: "Integrações", crumb: "Configurações · Integrações", title: "Integrações" },
-  { id: "status", label: "Status & Preview", crumb: "Configurações · Status", title: "Status & preview" },
+  { id: "status", label: "Status & Preview", crumb: "Configurações · Status", title: "Status & preview", ready: true },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -56,6 +59,7 @@ export function AdminShell({
   onSignOut: () => void;
 }) {
   const [tab, setTab] = useState<TabId>("geral");
+  const [status, setStatus] = useState(event.status);
   const [saving, setSaving] = useState(false);
   const [canSave, setCanSave] = useState(false);
   const [toast, setToast] = useState<{ msg: string; kind: "ok" | "error" } | null>(null);
@@ -121,8 +125,8 @@ export function AdminShell({
               <span className="a-crumbs">{meta.crumb}</span>
               <h1>{meta.title}</h1>
             </div>
-            <span className={`a-pill a-pill-${event.status}`}>
-              <span className="a-led" /> {STATUS_LABEL[event.status] ?? event.status}
+            <span className={`a-pill a-pill-${status}`}>
+              <span className="a-led" /> {STATUS_LABEL[status] ?? status}
             </span>
             <div className="a-spacer" />
             <div className="a-admin-chip"><span className="a-av">{initial}</span> {email}</div>
@@ -139,10 +143,10 @@ export function AdminShell({
             )}
             {tab === "lotes" && <TabLotes notify={notify} />}
 
-            {tab === "visual" && <Placeholder title="Identidade Visual" desc="Cores do evento com preview ao vivo." body="Color pickers para as cores primária, títulos, fundo e destaque — com prévia instantânea." />}
-            {tab === "imagens" && <Placeholder title="Imagens" desc="Logo, banner, favicon e galeria." body="Upload direto para o armazenamento do Supabase, com recorte e reordenação." />}
+            {tab === "visual" && <TabVisual event={event} registerSaver={registerSaver} notify={notify} />}
+            {tab === "imagens" && <TabImagens event={event} notify={notify} />}
             {tab === "integra" && <Placeholder title="Integrações" desc="Mercado Pago e sincronização." body="Access Token (guardado criptografado, exibido como •••• 4821), Public Key e URL de webhook." />}
-            {tab === "status" && <Placeholder title="Status & Preview" desc="Ativo · Em Breve · Encerrado." body="Um toggle que troca o site para a página “Em Breve” com captura de leads, sem liberar a compra." />}
+            {tab === "status" && <TabStatus current={status} notify={notify} onChanged={setStatus} />}
           </div>
         </div>
       </div>

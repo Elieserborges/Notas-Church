@@ -1,23 +1,28 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { normalizeCode } from "@/lib/codes";
-import { EVENT } from "@/lib/event";
+import { getEventConfig } from "@/lib/config";
 import { siteUrl } from "@/lib/site";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { OrderRow, TicketRow } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: `Meu ingresso · ${EVENT.name}`,
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = await getEventConfig();
+  return {
+    title: `Meu ingresso · ${cfg.name}`,
+    robots: { index: false },
+  };
+}
 
 export default async function IngressoPage({
   params,
 }: {
   params: Promise<{ code: string }>;
 }) {
+  const cfg = await getEventConfig();
   const { code: rawCode } = await params;
   const code = normalizeCode(decodeURIComponent(rawCode));
 
@@ -54,9 +59,9 @@ export default async function IngressoPage({
     <main className="ticket-page">
       <div className="ticket-card">
         <div className="ticket-card-head">
-          <p className="church">{EVENT.church}</p>
-          <h1>{EVENT.name}</h1>
-          <p className="tagline">{EVENT.tagline}</p>
+          <p className="church">{cfg.church}</p>
+          <h1>{cfg.name}</h1>
+          <p className="tagline">{cfg.tagline}</p>
         </div>
         <div className="ticket-card-body">
           <p className="ticket-holder">Ingresso de</p>
@@ -79,11 +84,11 @@ export default async function IngressoPage({
           <hr className="ticket-sep" />
 
           <div className="ticket-details">
-            <span>📅 {EVENT.dateLabel}</span>
+            <span>📅 {cfg.dateLabel}</span>
             <br />
-            <span>🕓 {EVENT.timeLabel}</span>
+            <span>🕓 {cfg.timeLabel}</span>
             <br />
-            <span>📍 {EVENT.addressLabel}</span>
+            <span>📍 {cfg.addressLabel}</span>
           </div>
         </div>
       </div>

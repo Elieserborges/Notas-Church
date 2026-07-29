@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { AvisoPrazoPagamento } from "@/components/AvisoPrazoPagamento";
 import { ContaBar } from "@/components/ContaBar";
-import { EVENT, formatBRL } from "@/lib/event";
+import { useEventConfig } from "@/components/EventConfigProvider";
+import { formatBRL } from "@/lib/event";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Inscricao = {
@@ -57,6 +58,7 @@ type Props = {
  * e paga. Não gera ingresso nem e-mail com QR Code.
  */
 export function ObreiroCard({ userEmail, onSignOut }: Props) {
+  const cfg = useEventConfig();
   // undefined = ainda carregando · null = ainda não inscrito
   const [inscricao, setInscricao] = useState<Inscricao | null | undefined>(
     undefined
@@ -75,7 +77,7 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
   // O valor muda com a camiseta. O servidor recalcula por conta dele —
   // aqui é só para a pessoa ver o preço enquanto escolhe.
   const valor =
-    querCamiseta === "sim" ? EVENT.workerPriceWithShirt : EVENT.workerPrice;
+    querCamiseta === "sim" ? cfg.workerPriceWithShirt : cfg.workerPrice;
 
   const carregar = useCallback(async () => {
     try {
@@ -165,7 +167,7 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
       <div className="form-card">
         <p className="form-title">Inscrição de obreiro ✅</p>
         <p className="form-sub">
-          Você já está inscrito como obreiro no {EVENT.name}.
+          Você já está inscrito como obreiro no {cfg.name}.
         </p>
 
         <ContaBar userEmail={userEmail} onSignOut={onSignOut} />
@@ -204,7 +206,7 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
               </a>
             ) : (
               <p className="hint">
-                Acerte o pagamento com a equipe da {EVENT.church}. Sua vaga já
+                Acerte o pagamento com a equipe da {cfg.church}. Sua vaga já
                 está guardada.
               </p>
             )}
@@ -225,7 +227,7 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
     <form className="form-card" onSubmit={confirmar}>
       <p className="form-title">Sou obreiro</p>
       <p className="form-sub">
-        Inscrição de obreiro do {EVENT.name}. É só conferir seu nome e
+        Inscrição de obreiro do {cfg.name}. É só conferir seu nome e
         confirmar — sem ficha para preencher.
       </p>
 
@@ -320,10 +322,10 @@ export function ObreiroCard({ userEmail, onSignOut }: Props) {
         >
           <option value="">Selecione…</option>
           <option value="nao">
-            Sem camiseta — {formatBRL(EVENT.workerPrice)}
+            Sem camiseta — {formatBRL(cfg.workerPrice)}
           </option>
           <option value="sim">
-            Com camiseta — {formatBRL(EVENT.workerPriceWithShirt)}
+            Com camiseta — {formatBRL(cfg.workerPriceWithShirt)}
           </option>
         </select>
       </div>

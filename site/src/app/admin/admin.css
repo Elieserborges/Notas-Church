@@ -204,6 +204,60 @@
 .admin-scope .a-lotes-foot { display: flex; gap: 22px; padding: 14px 20px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); background: #faf4e2; }
 .admin-scope .a-lotes-foot b { color: var(--navy); font-variant-numeric: tabular-nums; }
 
+/* ---------- Identidade Visual (cores) ---------- */
+.admin-scope .a-visual { max-width: 940px; }
+.admin-scope .a-colors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 22px; }
+.admin-scope .a-color { display: flex; align-items: center; gap: 12px; }
+.admin-scope .a-color > input[type="color"] {
+  width: 42px; height: 40px; flex: none; padding: 3px; cursor: pointer;
+  border: 1.5px solid var(--line); border-radius: 9px; background: #fff;
+}
+.admin-scope .a-color-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.admin-scope .a-color-lab { font-size: 12px; font-weight: 700; color: var(--navy); }
+.admin-scope .a-color-lab em { color: var(--muted); font-weight: 500; font-style: normal; }
+.admin-scope .a-color-txt {
+  font: inherit; font-variant-numeric: tabular-nums; text-transform: lowercase;
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 6px 9px; background: #fff; color: var(--ink);
+}
+.admin-scope .a-color-txt:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 28%, transparent); }
+.admin-scope .a-visual-actions { margin-top: 18px; }
+
+.admin-scope .a-preview { border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+.admin-scope .a-preview h3 { margin: 0 0 6px; font-size: 22px; font-weight: 800; }
+.admin-scope .a-preview p { margin: 0 0 16px; font-size: 14px; }
+.admin-scope .a-preview-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.admin-scope .a-preview-btn { border: 0; color: #fff; font: inherit; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: default; }
+.admin-scope .a-preview-tag { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 999px; }
+
+/* ---------- Imagens ---------- */
+.admin-scope .a-media-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.admin-scope .a-media { display: flex; gap: 14px; border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fff; }
+.admin-scope .a-media-preview {
+  width: 96px; height: 96px; flex: none; border-radius: 10px; overflow: hidden;
+  border: 1.5px dashed var(--line); background: #faf4e2; display: grid; place-items: center;
+}
+.admin-scope .a-media-preview img { width: 100%; height: 100%; object-fit: contain; }
+.admin-scope .a-media-empty { font-size: 11.5px; color: var(--muted); }
+.admin-scope .a-media-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.admin-scope .a-media-lab { font-size: 13.5px; font-weight: 800; color: var(--navy); }
+.admin-scope .a-media-hint { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.admin-scope .a-media-actions { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; }
+
+/* ---------- Status ---------- */
+.admin-scope .a-status-opts { display: flex; flex-direction: column; gap: 12px; max-width: 620px; }
+.admin-scope .a-status-opt {
+  display: flex; align-items: center; gap: 14px; text-align: left; cursor: pointer;
+  background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 16px; font: inherit;
+}
+.admin-scope .a-status-opt:hover:not(:disabled) { border-color: var(--blue); }
+.admin-scope .a-status-opt.active { border-color: var(--crimson); box-shadow: 0 0 0 3px color-mix(in srgb, var(--crimson) 18%, transparent); }
+.admin-scope .a-status-opt:disabled { opacity: 0.7; cursor: default; }
+.admin-scope .a-status-emoji { font-size: 22px; flex: none; }
+.admin-scope .a-status-txt { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.admin-scope .a-status-txt b { color: var(--navy); font-size: 14.5px; }
+.admin-scope .a-status-txt em { color: var(--muted); font-style: normal; font-size: 12.5px; }
+.admin-scope .a-status-badge { font-size: 11px; font-weight: 800; color: var(--crimson); background: color-mix(in srgb, var(--crimson) 12%, #fff); padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+
 /* ---------- Placeholder ---------- */
 .admin-scope .a-soon .a-card-body { display: flex; align-items: center; gap: 14px; color: var(--muted); }
 .admin-scope .a-badge { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #2f6a8c; background: color-mix(in srgb, var(--blue) 16%, #fff); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }

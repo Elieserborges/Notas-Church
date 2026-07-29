@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { AvisoPrazoPagamento } from "@/components/AvisoPrazoPagamento";
 import { BuyForm } from "@/components/BuyForm";
 import { ContaBar } from "@/components/ContaBar";
-import { EVENT, formatBRL } from "@/lib/event";
+import { useEventConfig } from "@/components/EventConfigProvider";
+import { formatBRL } from "@/lib/event";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Inscricao = {
@@ -42,6 +43,7 @@ type Props = {
  * receber o formulário em branco de novo.
  */
 export function MinhaInscricao({ userEmail, onSignOut }: Props) {
+  const cfg = useEventConfig();
   const [inscricoes, setInscricoes] = useState<Inscricao[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [novaInscricao, setNovaInscricao] = useState(false);
@@ -107,7 +109,7 @@ export function MinhaInscricao({ userEmail, onSignOut }: Props) {
     <div className="form-card">
       <p className="form-title">Sua inscrição ✅</p>
       <p className="form-sub">
-        Você já está inscrito no {EVENT.name} — não precisa preencher de novo.
+        Você já está inscrito no {cfg.name} — não precisa preencher de novo.
       </p>
 
       <ContaBar userEmail={userEmail} onSignOut={onSignOut} />
@@ -153,7 +155,7 @@ export function MinhaInscricao({ userEmail, onSignOut }: Props) {
                 </>
               ) : (
                 <p className="hint">
-                  Acerte o pagamento com a equipe da {EVENT.church}. Sua vaga já
+                  Acerte o pagamento com a equipe da {cfg.church}. Sua vaga já
                   está guardada.
                 </p>
               )}

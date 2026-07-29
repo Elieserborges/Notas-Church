@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { AdminApp } from "@/components/admin/AdminApp";
 import "./admin.css";
+
+// Fonte do painel (design system VERUS).
+const inter = Inter({ subsets: ["latin"], variable: "--font-admin", display: "swap" });
 
 // Painel interno — não deve ser indexado por buscadores.
 export const metadata: Metadata = {
@@ -9,5 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPage() {
-  return <AdminApp />;
+  return (
+    <div className={inter.variable}>
+      <AdminApp />
+    </div>
+  );
 }

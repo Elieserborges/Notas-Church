@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <main className="status-page">
       <div className="status-card">
-        <div className="status-emoji">🌸</div>
+        <div className="status-emoji">🧭</div>
         <h1>Página não encontrada</h1>
         <p>
           O link que você acessou não existe ou o ingresso não foi localizado.

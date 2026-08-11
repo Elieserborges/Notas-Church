@@ -58,6 +58,7 @@ export async function GET(
     return NextResponse.json({
       id: order.id,
       status: order.status,
+      tipo: order.tipo,
       name: order.name,
       email: order.email,
       quantity: order.quantity,

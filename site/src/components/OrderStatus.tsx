@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type OrderData = {
   id: string;
   status: string;
+  tipo: string;
   name: string;
   email: string;
   quantity: number;
@@ -76,6 +77,23 @@ export function OrderStatus({ mode }: { mode: "sucesso" | "pendente" }) {
 
   // Aprovado 🎉
   if (order?.status === "approved") {
+    // Obreiro não recebe ingresso/QR Code — só a confirmação da vaga.
+    if (order.tipo === "obreiro") {
+      return (
+        <div className="status-card">
+          <div className="status-emoji">🙌</div>
+          <h1>Inscrição confirmada!</h1>
+          <p>
+            {order.name.split(" ")[0]}, sua inscrição de <strong>obreiro</strong>{" "}
+            está garantida. Obreiro não usa ingresso com QR Code — é só chegar no
+            dia e servir com a gente.
+          </p>
+          <p style={{ fontSize: 13.5 }}>
+            Qualquer dúvida, fale com a organização.
+          </p>
+        </div>
+      );
+    }
     return (
       <div className="status-card">
         <div className="status-emoji">🎉</div>

@@ -452,19 +452,22 @@ export function SheetClient() {
         <div className="stat-card">
           <span className="stat-value">{formatBRL(recDinheiro)}</span>
           <span className="stat-label">💵 Receita em Dinheiro</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{formatBRL(recPix)}</span>
-          <span className="stat-label">⚡ Receita em PIX</span>
           <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
-            bruto {formatBRL(brutoForma("pix"))}
+            sem taxa
           </span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{formatBRL(recCartao)}</span>
+          <span className="stat-value">{formatBRL(brutoForma("pix"))}</span>
+          <span className="stat-label">⚡ Receita em PIX</span>
+          <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
+            líquido {formatBRL(recPix)} (com taxa)
+          </span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{formatBRL(brutoForma("cartao"))}</span>
           <span className="stat-label">💳 Receita em Cartão</span>
           <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
-            bruto {formatBRL(brutoForma("cartao"))}
+            líquido {formatBRL(recCartao)} (com taxa)
           </span>
         </div>
         <div className="stat-card">

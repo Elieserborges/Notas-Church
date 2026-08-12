@@ -114,6 +114,17 @@ const selectStyle: React.CSSProperties = {
   color: "inherit",
 };
 
+const miniSelect: React.CSSProperties = {
+  border: "1.5px solid #eadbc8",
+  borderRadius: 8,
+  padding: "4px 8px",
+  background: "var(--cream)",
+  font: "inherit",
+  fontSize: 12.5,
+  color: "inherit",
+  cursor: "pointer",
+};
+
 export function SheetClient() {
   const cfg = useEventConfig();
   const [pin, setPin] = useState<string | null>(null);
@@ -179,30 +190,34 @@ export function SheetClient() {
     load(value);
   }
 
-  /** Confirma na mão um pagamento em dinheiro/Pix direto com a equipe. */
-  async function marcarComoPago(o: SheetOrder) {
+  /** Muda a forma de pagamento e/ou a situação de uma inscrição. */
+  async function mudarPagamento(
+    o: SheetOrder,
+    patch: { paymentMethod?: string; status?: string }
+  ) {
     if (!pin) return;
-    const ok = window.confirm(
-      `Confirmar o pagamento de ${o.name}?\n\n` +
-        `Isso marca a inscrição como PAGA, gera o ingresso e envia o ` +
-        `e-mail com o QR Code para ${o.email}.`
-    );
-    if (!ok) return;
+    // Marcar como PAGO gera ingresso + e-mail (participante) → confirma antes.
+    if (patch.status === "approved") {
+      const ok = window.confirm(
+        `Confirmar o pagamento de ${o.name}?\n\n` +
+          `Marca como PAGA. Se for participante, gera o ingresso e envia o ` +
+          `QR Code por e-mail para ${o.email}.`
+      );
+      if (!ok) return;
+    }
     setMarcando(o.id);
     setError(null);
     try {
-      const res = await fetch("/api/admin/mark-paid", {
+      const res = await fetch("/api/admin/set-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin, orderId: o.id }),
+        body: JSON.stringify({ pin, orderId: o.id, ...patch }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Não foi possível confirmar.");
+      if (!res.ok) throw new Error(data.error ?? "Não foi possível salvar.");
       await load(pin);
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Erro ao confirmar o pagamento."
-      );
+      setError(e instanceof Error ? e.message : "Erro ao salvar a alteração.");
     } finally {
       setMarcando(null);
     }
@@ -528,46 +543,57 @@ export function SheetClient() {
                     <td className="nowrap">{fmtPhone(o.phone)}</td>
                     <td>{dash(o.shirt_size)}</td>
                     <td className="nowrap">
-                      {o.payment_method
-                        ? (PAY_LABEL[o.payment_method] ?? o.payment_method)
-                        : "—"}
+                      <select
+                        aria-label="Forma de pagamento"
+                        value={o.payment_method ?? ""}
+                        disabled={marcando === o.id || excluindo === o.id}
+                        onChange={(e) =>
+                          mudarPagamento(o, { paymentMethod: e.target.value })
+                        }
+                        style={miniSelect}
+                      >
+                        {!o.payment_method && <option value="">—</option>}
+                        <option value="pix">PIX</option>
+                        <option value="cartao">Cartão</option>
+                        <option value="dinheiro">Dinheiro</option>
+                      </select>
                     </td>
                     <td>
                       <span className={`pay-chip pay-${o.status}`}>
                         {STATUS_LABEL[o.status] ?? o.status}
                       </span>
-                      {o.status === "pending" && (
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-start",
-                            gap: 6,
-                            marginTop: 8,
-                          }}
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                          gap: 6,
+                          marginTop: 8,
+                        }}
+                      >
+                        <select
+                          aria-label="Situação do pagamento"
+                          value={o.status}
+                          disabled={marcando === o.id || excluindo === o.id}
+                          onChange={(e) =>
+                            mudarPagamento(o, { status: e.target.value })
+                          }
+                          style={miniSelect}
                         >
-                          {o.payment_method === "dinheiro" && (
-                            <button
-                              type="button"
-                              className="sheet-action sheet-action--pagar"
-                              onClick={() => marcarComoPago(o)}
-                              disabled={marcando === o.id || excluindo === o.id}
-                            >
-                              {marcando === o.id
-                                ? "confirmando…"
-                                : "✓ Confirmar pagamento"}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="sheet-action sheet-action--excluir"
-                            onClick={() => excluirInscricao(o)}
-                            disabled={marcando === o.id || excluindo === o.id}
-                          >
-                            {excluindo === o.id ? "excluindo…" : "🗑 Excluir"}
-                          </button>
-                        </div>
-                      )}
+                          <option value="pending">Pendente</option>
+                          <option value="approved">Pago</option>
+                          <option value="cortesia">Cortesia</option>
+                          <option value="rejected">Recusado</option>
+                        </select>
+                        <button
+                          type="button"
+                          className="sheet-action sheet-action--excluir"
+                          onClick={() => excluirInscricao(o)}
+                          disabled={marcando === o.id || excluindo === o.id}
+                        >
+                          {excluindo === o.id ? "excluindo…" : "🗑 Excluir"}
+                        </button>
+                      </div>
                     </td>
                     <td>
                       {o.tickets.length === 0 ? (

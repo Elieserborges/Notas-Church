@@ -382,6 +382,19 @@ export function SheetClient() {
   const aReceberLiq = pending.reduce((s, o) => s + liquidoDe(o.total, o.payment_method), 0);
   const aReceberBruto = pending.reduce((s, o) => s + o.total, 0);
 
+  // Receita recebida (líquida) quebrada por forma de pagamento.
+  const recebidoForma = (metodo: string) =>
+    approved
+      .filter((o) => o.payment_method === metodo)
+      .reduce((s, o) => s + liquidoDe(o.total, o.payment_method), 0);
+  const brutoForma = (metodo: string) =>
+    approved
+      .filter((o) => o.payment_method === metodo)
+      .reduce((s, o) => s + o.total, 0);
+  const recDinheiro = recebidoForma("dinheiro");
+  const recPix = recebidoForma("pix");
+  const recCartao = recebidoForma("cartao");
+
   const term = fold(filter);
   const visible = all
     .filter((o) => statusFilter === "todos" || o.status === statusFilter)
@@ -434,6 +447,24 @@ export function SheetClient() {
           <span className="stat-label">📌 A receber (líquido)</span>
           <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
             bruto {formatBRL(aReceberBruto)}
+          </span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{formatBRL(recDinheiro)}</span>
+          <span className="stat-label">💵 Receita em Dinheiro</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{formatBRL(recPix)}</span>
+          <span className="stat-label">⚡ Receita em PIX</span>
+          <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
+            bruto {formatBRL(brutoForma("pix"))}
+          </span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{formatBRL(recCartao)}</span>
+          <span className="stat-label">💳 Receita em Cartão</span>
+          <span style={{ fontSize: 11.5, color: "var(--brown)", marginTop: 3 }}>
+            bruto {formatBRL(brutoForma("cartao"))}
           </span>
         </div>
         <div className="stat-card">

@@ -585,14 +585,16 @@ export function SheetClient() {
                           <option value="cortesia">Cortesia</option>
                           <option value="rejected">Recusado</option>
                         </select>
-                        <button
-                          type="button"
-                          className="sheet-action sheet-action--excluir"
-                          onClick={() => excluirInscricao(o)}
-                          disabled={marcando === o.id || excluindo === o.id}
-                        >
-                          {excluindo === o.id ? "excluindo…" : "🗑 Excluir"}
-                        </button>
+                        {o.status !== "approved" && (
+                          <button
+                            type="button"
+                            className="sheet-action sheet-action--excluir"
+                            onClick={() => excluirInscricao(o)}
+                            disabled={marcando === o.id || excluindo === o.id}
+                          >
+                            {excluindo === o.id ? "excluindo…" : "🗑 Excluir"}
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td>

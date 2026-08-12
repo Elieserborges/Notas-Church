@@ -1040,6 +1040,26 @@ a {
   }
 }
 
+/* No celular, esconde colunas menos usadas — o resto fica no botão "Ver".
+   Ordem: 1 Nome · 2 Tipo · 3 Telefone · 4 Camiseta · 5 Forma ·
+   6 Pagamento · 7 Ingressos · 8 Inscrição · 9 Ficha(Ver).
+   Mantém 1, 2, 5, 6 e 9; esconde 3, 4, 7 e 8. */
+@media (max-width: 620px) {
+  .sheet-table th:nth-child(3),
+  .sheet-table td:nth-child(3),
+  .sheet-table th:nth-child(4),
+  .sheet-table td:nth-child(4),
+  .sheet-table th:nth-child(7),
+  .sheet-table td:nth-child(7),
+  .sheet-table th:nth-child(8),
+  .sheet-table td:nth-child(8) {
+    display: none;
+  }
+  .sheet-table {
+    min-width: 0;
+  }
+}
+
 /* ============================================================
    Páginas de status (sucesso / pendente / erro)
    ============================================================ */

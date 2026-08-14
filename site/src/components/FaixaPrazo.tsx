@@ -7,8 +7,8 @@ export async function FaixaPrazo() {
     <div
       role="note"
       style={{
-        background: "#FEE2E2",
-        color: "#DC2626",
+        background: "#E11900",
+        color: "#ffffff",
         textAlign: "center",
         padding: "10px 16px",
         fontWeight: 800,

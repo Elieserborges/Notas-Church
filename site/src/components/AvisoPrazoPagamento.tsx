@@ -12,8 +12,8 @@ export function AvisoPrazoPagamento() {
   return (
     <p
       style={{
-        background: "#FEE2E2",
-        color: "#DC2626",
+        background: "#E11900",
+        color: "#ffffff",
         borderRadius: 10,
         padding: "11px 13px",
         margin: "0 0 14px",

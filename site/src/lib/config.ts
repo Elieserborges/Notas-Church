@@ -55,6 +55,7 @@ export type EventConfig = {
   supportWhatsapp: string;
   dateLabel: string;
   registrationDeadlineLabel: string;
+  paymentDeadlineLabel: string;
   timeLabel: string;
   isoStart: string;
   isoEnd: string;
@@ -79,8 +80,9 @@ export type EventConfig = {
 
 const STRING_KEYS = [
   "name", "tagline", "audience", "church", "supportWhatsapp", "dateLabel",
-  "registrationDeadlineLabel", "timeLabel", "isoStart", "isoEnd",
-  "addressLabel", "mapsUrl", "codePrefix", "statementDescriptor",
+  "registrationDeadlineLabel", "paymentDeadlineLabel", "timeLabel",
+  "isoStart", "isoEnd", "addressLabel", "mapsUrl", "codePrefix",
+  "statementDescriptor",
 ] as const;
 
 const NUMBER_KEYS = [
@@ -100,6 +102,7 @@ function baseDefaults(): EventConfig {
     supportWhatsapp: EVENT.supportWhatsapp,
     dateLabel: EVENT.dateLabel,
     registrationDeadlineLabel: EVENT.registrationDeadlineLabel,
+    paymentDeadlineLabel: EVENT.registrationDeadlineLabel,
     timeLabel: EVENT.timeLabel,
     isoStart: EVENT.isoStart,
     isoEnd: EVENT.isoEnd,

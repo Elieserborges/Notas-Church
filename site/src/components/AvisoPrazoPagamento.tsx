@@ -12,12 +12,12 @@ export function AvisoPrazoPagamento() {
   return (
     <p
       style={{
-        background: "#DC2626",
-        color: "#ffffff",
+        background: "#FEE2E2",
+        color: "#DC2626",
         borderRadius: 10,
         padding: "11px 13px",
         margin: "0 0 14px",
-        fontWeight: 700,
+        fontWeight: 800,
         fontSize: 14,
         lineHeight: 1.45,
         textAlign: "center",

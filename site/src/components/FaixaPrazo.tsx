@@ -1,23 +1,23 @@
 import { getEventConfig } from "@/lib/config";
 
-/** Faixa amarela do topo com o prazo das inscrições. */
+/** Faixa do topo com o prazo de pagamento (texto em vermelho). */
 export async function FaixaPrazo() {
   const cfg = await getEventConfig();
   return (
     <div
       role="note"
       style={{
-        background: "#FACC15",
-        color: "#1f2937",
+        background: "#FEE2E2",
+        color: "#DC2626",
         textAlign: "center",
         padding: "10px 16px",
-        fontWeight: 700,
+        fontWeight: 800,
         fontSize: "0.9rem",
         textTransform: "uppercase",
         letterSpacing: "0.03em",
       }}
     >
-      Inscrições até dia {cfg.registrationDeadlineLabel}
+      Pagamento até dia {cfg.paymentDeadlineLabel}
     </div>
   );
 }

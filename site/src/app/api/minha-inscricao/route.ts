@@ -63,52 +63,54 @@ export async function GET(req: Request) {
         let payUrl: string | null = null;
 
         if (o.status === "pending" && process.env.MP_ACCESS_TOKEN) {
-          if (o.mp_preference_id) {
-            payUrl = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${o.mp_preference_id}`;
-          } else {
-            // Inscrição feita antes do Mercado Pago existir: cria o link agora.
-            try {
-              const isPublic = site.startsWith("https://");
-              const pref = await mpPreference().create({
-                body: {
-                  items: [
-                    {
-                      id: "inscricao-face-a-face",
-                      title: `Inscrição ${EVENT.name} · ${EVENT.dateLabel}`,
-                      description: EVENT.tagline,
-                      category_id: "tickets",
-                      quantity: 1,
-                      unit_price: Number(o.total),
-                      currency_id: "BRL",
-                    },
-                  ],
-                  payer: { name: o.name, email },
-                  external_reference: o.id,
-                  metadata: { order_id: o.id },
-                  statement_descriptor: EVENT.statementDescriptor,
-                  payment_methods: { installments: EVENT.maxInstallments },
-                  back_urls: {
-                    success: `${site}/sucesso?pedido=${o.id}`,
-                    pending: `${site}/pendente?pedido=${o.id}`,
-                    failure: `${site}/erro?pedido=${o.id}`,
+          // Sempre gera um link NOVO do Mercado Pago. As preferências
+          // antigas expiram e passam a mostrar "seção não disponível" —
+          // reaproveitar o link antigo é justamente o que travava o pagamento.
+          try {
+            const isPublic = site.startsWith("https://");
+            const pref = await mpPreference().create({
+              body: {
+                items: [
+                  {
+                    id: "inscricao-face-a-face",
+                    title: `Inscrição ${EVENT.name} · ${EVENT.dateLabel}`,
+                    description: EVENT.tagline,
+                    category_id: "tickets",
+                    quantity: 1,
+                    unit_price: Number(o.total),
+                    currency_id: "BRL",
                   },
-                  ...(isPublic
-                    ? {
-                        auto_return: "approved",
-                        notification_url: `${site}/api/webhook`,
-                      }
-                    : {}),
+                ],
+                payer: { name: o.name, email },
+                external_reference: o.id,
+                metadata: { order_id: o.id },
+                statement_descriptor: EVENT.statementDescriptor,
+                payment_methods: { installments: EVENT.maxInstallments },
+                back_urls: {
+                  success: `${site}/sucesso?pedido=${o.id}`,
+                  pending: `${site}/pendente?pedido=${o.id}`,
+                  failure: `${site}/erro?pedido=${o.id}`,
                 },
-              });
-              payUrl = pref.init_point ?? null;
-              if (pref.id) {
-                await db
-                  .from("orders")
-                  .update({ mp_preference_id: pref.id })
-                  .eq("id", o.id);
-              }
-            } catch (e) {
-              console.error("[minha-inscricao/mercadopago]", e);
+                ...(isPublic
+                  ? {
+                      auto_return: "approved",
+                      notification_url: `${site}/api/webhook`,
+                    }
+                  : {}),
+              },
+            });
+            payUrl = pref.init_point ?? null;
+            if (pref.id && pref.id !== o.mp_preference_id) {
+              await db
+                .from("orders")
+                .update({ mp_preference_id: pref.id })
+                .eq("id", o.id);
+            }
+          } catch (e) {
+            console.error("[minha-inscricao/mercadopago]", e);
+            // Último recurso: link antigo (melhor que ficar sem botão).
+            if (o.mp_preference_id) {
+              payUrl = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${o.mp_preference_id}`;
             }
           }
         }
